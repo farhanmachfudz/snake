@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Snake Game - Google Doodle Style</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #1e293b;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-x: hidden;
+      color: #fff;
+    }
+
+    .game-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #4a752c;
+      border: 4px solid #3c5e23;
+      max-width: 100%;
+    }
+
+    /* Top Header Bar */
+    .game-header {
+      width: 100%;
+      height: 60px;
+      background-color: #4a752c;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      z-index: 10;
+    }
+
+    .score-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-weight: 700;
+      font-size: 22px;
+    }
+
+    .fruit-counter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fruit-icon {
+      width: 28px;
+      height: 28px;
+      display: inline-block;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      outline: none;
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.28);
+      transform: scale(1.05);
+    }
+
+    .btn-icon:active {
+      transform: scale(0.95);
+    }
+
+    .btn-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Canvas Area */
+    .canvas-container {
+      position: relative;
+      background: #578a34;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      display: block;
+      border-radius: 6px;
+      background: #a2d149;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
+      image-rendering: pixelated;
+    }
+
+    /* Overlay / Dialogs */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 20;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .card-modal {
+      background: #3b5f22;
+      border: 3px solid #5a8e35;
+      padding: 24px 32px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+      max-width: 90%;
+      width: 320px;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .card-modal h2 {
+      font-size: 28px;
+      margin-bottom: 14px;
+      color: #ffd152;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      margin: 16px 0;
+      background: rgba(0,0,0,0.2);
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #c9e69c;
+      margin-bottom: 4px;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .fruit-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 12px 0 18px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .fruit-breakdown div {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-primary {
+      background: #4a75f0;
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(74, 117, 240, 0.4);
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .btn-primary:hover {
+      background: #3964db;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(74, 117, 240, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      padding: 12px 22px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 28px;
+      cursor: pointer;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.28);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(1px);
+    }
+
+    /* Start Difficulty Modal */
+    .card-modal.start-modal {
+      width: 380px;
+      max-width: 95%;
+      padding: 24px 26px;
+    }
+
+    .modal-title-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.28);
+      color: #bbf7d0;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(187, 247, 208, 0.2);
+    }
+
+    .modal-subtitle {
+      font-size: 13px;
+      color: #d4edb0;
+      margin-bottom: 18px;
+    }
+
+    .difficulty-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .diff-card {
+      background: rgba(0, 0, 0, 0.22);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.2s ease;
+      outline: none;
+      user-select: none;
+    }
+
+    .diff-card:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .diff-card.active {
+      background: rgba(74, 117, 240, 0.35);
+      border-color: #60a5fa;
+      box-shadow: 0 0 16px rgba(96, 165, 250, 0.45);
+      transform: scale(1.03);
+    }
+
+    .diff-icon {
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .diff-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .diff-desc {
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+
+    .diff-badge-score {
+      font-size: 10px;
+      font-weight: 600;
+      color: #ffd152;
+      background: rgba(0, 0, 0, 0.32);
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-start {
+      width: 100%;
+      font-size: 18px;
+      padding: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Header Difficulty Pill Button */
+    .diff-pill-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .diff-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.04);
+    }
+
+    .diff-pill-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Mobile Controls */
+    .mobile-controls {
+      display: none;
+      margin-top: 16px;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .touch-btn {
+      background: #334155;
+      color: white;
+      border: 2px solid #475569;
+      border-radius: 14px;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.1s;
+    }
+
+    .touch-btn:active {
+      background: #4a75f0;
+    }
+
+    #btnUp { grid-column: 2; grid-row: 1; }
+    #btnLeft { grid-column: 1; grid-row: 2; }
+    #btnDown { grid-column: 2; grid-row: 2; }
+    #btnRight { grid-column: 3; grid-row: 2; }
+
+    @media (max-width: 768px) {
+      .mobile-controls {
+        display: grid;
+      }
+    }
+
+    .instructions {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-wrapper">
+    <!-- Top Header -->
+    <div class="game-header">
+      <div class="score-container">
+        <!-- Main Apple / Total Counter -->
+        <div class="fruit-counter">
+          <canvas id="headerApple" width="28" height="28" class="fruit-icon"></canvas>
+          <span id="scoreText">0</span>
+        </div>
+        <!-- Trophy High Score -->
+        <div class="fruit-counter" style="color: #ffd152; font-size: 18px;">
+          <svg style="width:20px;height:20px;fill:#ffd152;margin-right:2px;" viewBox="0 0 24 24">
+            <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
+          </svg>
+          <span id="highScoreText">0</span>
+        </div>
+
+        <!-- Difficulty Pill Button -->
+        <button id="headerDiffBtn" class="diff-pill-btn" title="Tingkat Kesulitan: Klik untuk ganti" type="button">
+          <span id="headerDiffIcon">🐇</span>
+          <span id="headerDiffName">Normal</span>
+        </button>
+      </div>
+
+      <!-- Actions: Mute & Reset/Pause -->
+      <div class="header-actions">
+        <button id="soundToggle" class="btn-icon" title="Toggle Suara">
+          <!-- Volume Up Icon -->
+          <svg id="soundIconOn" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <!-- Volume Mute Icon -->
+          <svg id="soundIconOff" viewBox="0 0 24 24" style="display:none;">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.73 4.73H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+          </svg>
+        </button>
+
+        <button id="pauseToggle" class="btn-icon" title="Jeda Permainan">
+          <svg id="pauseIcon" viewBox="0 0 24 24">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+          </svg>
+        </button>
+
+        <button id="restartBtn" class="btn-icon" title="Ulangi Permainan">
+          <svg viewBox="0 0 24 24">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Playfield Canvas Container -->
+    <div class="canvas-container">
+      <canvas id="gameCanvas" width="595" height="525"></canvas>
+
+      <!-- Start / Difficulty Selection Modal Overlay -->
+      <div id="startModal" class="overlay active">
+        <div class="card-modal start-modal">
+          <div class="modal-title-badge">🐍 GOOGLE SNAKE</div>
+          <h2>Pilih Kesulitan</h2>
+          <p class="modal-subtitle">Pilih kecepatan sebelum memulai permainan:</p>
+
+          <div class="difficulty-grid">
+            <button class="diff-card" data-diff="easy" type="button">
+              <span class="diff-icon">🐢</span>
+              <div class="diff-name">Mudah</div>
+              <div class="diff-desc">Santai (140ms)</div>
+              <span class="diff-badge-score" id="diffScore_easy">Best: 0</span>
+            </button>
+
+            <button class="diff-card active" data-diff="normal" type="button">
+              <span class="diff-icon">🐇</span>
+              <div class="diff-name">Normal</div>
+              <div class="diff-desc">Standar (100ms)</div>
+              <span class="diff-badge-score" id="diffScore_normal">Best: 0</span>
+            </button>
+
+            <button class="diff-card" data-diff="hard" type="button">
+              <span class="diff-icon">⚡</span>
+              <div class="diff-name">Sulit</div>
+              <div class="diff-desc">Cepat (70ms)</div>
+              <span class="diff-badge-score" id="diffScore_hard">Best: 0</span>
+            </button>
+
+            <button class="diff-card" data-diff="extreme" type="button">
+              <span class="diff-icon">🔥</span>
+              <div class="diff-name">Ekstrem</div>
+              <div class="diff-desc">Kilat (45ms)</div>
+              <span class="diff-badge-score" id="diffScore_extreme">Best: 0</span>
+            </button>
+          </div>
+
+          <button id="startGameBtn" class="btn-primary btn-start" type="button">Mulai Bermain 🚀</button>
+        </div>
+      </div>
+
+      <!-- Game Over Modal Overlay -->
+      <div id="gameOverModal" class="overlay">
+        <div class="card-modal">
+          <h2>Permainan Berakhir!</h2>
+          <div class="stats-row">
+            <div class="stat-item">
+              <span class="stat-label">Skor</span>
+              <span id="finalScore" class="stat-val">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Terbaik</span>
+              <span id="bestScore" class="stat-val">0</span>
+            </div>
+          </div>
+
+          <div class="fruit-breakdown">
+            <div><canvas id="statApple" width="20" height="20"></canvas> <span id="countApple">0</span></div>
+            <div><canvas id="statPineapple" width="20" height="20"></canvas> <span id="countPineapple">0</span></div>
+            <div><canvas id="statGrape" width="20" height="20"></canvas> <span id="countGrape">0</span></div>
+          </div>
+
+          <div class="modal-actions">
+            <button id="playAgainBtn" class="btn-primary">Main Lagi</button>
+            <button id="changeDiffBtn" class="btn-secondary" type="button">Ganti Level</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause Modal Overlay -->
+      <div id="pauseModal" class="overlay">
+        <div class="card-modal">
+          <h2>Game Dijeda</h2>
+          <p style="margin-bottom: 20px; color: #d4edb0;">Tekan spasi atau tombol di bawah untuk lanjut bermain</p>
+          <button id="resumeBtn" class="btn-primary">Lanjutkan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile On-Screen D-Pad -->
+  <div class="mobile-controls">
+    <button class="touch-btn" id="btnUp">▲</button>
+    <button class="touch-btn" id="btnLeft">◀</button>
+    <button class="touch-btn" id="btnDown">▼</button>
+    <button class="touch-btn" id="btnRight">▶</button>
+  </div>
+
+  <div class="instructions">
+    Gunakan tombol <b>Panah (Arrow Keys)</b> atau <b>W, A, S, D</b> untuk mengontrol ular. Tekan <b>Spasi</b> untuk jeda. Tekan <b>1 - 4</b> atau klik untuk memilih tingkat kesulitan.
+  </div>
+
+  <script>
+    /* ==========================================================================
+       GOOGLE SNAKE CLONE - SINGLE FILE
+       Features:
+       - 3 active fruits: Apel (Apple), Nanas (Pineapple), Anggur (Grape)
+       - Google Doodle Snake aesthetics: Checkered green board, blue rounded snake with animated eyes
+       - Built-in sound generator using Web Audio API (no external sound files required)
+       - Touch & keyboard responsive controls
+       ========================================================================== */
+
+    // Sound System with Web Audio API
+    class SoundController {
+      constructor() {
+        this.ctx = null;
+        this.isMuted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleMute() {
+        this.isMuted = !this.isMuted;
+        return this.isMuted;
+      }
+
+      playEatSound(fruitType) {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        // Distinct musical notes for different fruits
+        let freq1 = 523.25; // C5 (Apple)
+        let freq2 = 659.25; // E5
+
+        if (fruitType === 'pineapple') {
+          freq1 = 659.25; // E5
+          freq2 = 783.99; // G5
+        } else if (fruitType === 'grape') {
+          freq1 = 783.99; // G5
+          freq2 = 1046.50; // C6
+        }
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq1, now);
+        osc.frequency.exponentialRampToValueAtTime(freq2, now + 0.08);
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.12);
+      }
+
+      playDieSound() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.35);
+      }
+
+      playTurnSound() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, now);
+        gain.gain.setValueAtTime(0.02, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.03);
+      }
+    }
+
+    const sound = new SoundController();
+
+    // Game Configuration
+    const COLS = 17;
+    const ROWS = 15;
+    const CELL_SIZE = 35; // 17 * 35 = 595, 15 * 35 = 525
+
+    const CANVAS_WIDTH = COLS * CELL_SIZE;
+    const CANVAS_HEIGHT = ROWS * CELL_SIZE;
+
+    // Checkerboard colors
+    const COLOR_BOARD_LIGHT = '#aad751';
+    const COLOR_BOARD_DARK = '#a2d149';
+
+    // Snake colors
+    const COLOR_SNAKE = '#4682ea'; // Google Snake blue
+
+    // Canvas setup
+    const canvas = document.getElementById('gameCanvas');
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    const ctx = canvas.getContext('2d');
+
+    // UI Elements
+    const scoreText = document.getElementById('scoreText');
+    const highScoreText = document.getElementById('highScoreText');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const pauseModal = document.getElementById('pauseModal');
+    const startModal = document.getElementById('startModal');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const changeDiffBtn = document.getElementById('changeDiffBtn');
+    const headerDiffBtn = document.getElementById('headerDiffBtn');
+    const headerDiffIcon = document.getElementById('headerDiffIcon');
+    const headerDiffName = document.getElementById('headerDiffName');
+    const diffCards = document.querySelectorAll('.diff-card');
+    const finalScore = document.getElementById('finalScore');
+    const bestScore = document.getElementById('bestScore');
+    const countApple = document.getElementById('countApple');
+    const countPineapple = document.getElementById('countPineapple');
+    const countGrape = document.getElementById('countGrape');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const pauseToggle = document.getElementById('pauseToggle');
+    const soundToggle = document.getElementById('soundToggle');
+    const soundIconOn = document.getElementById('soundIconOn');
+    const soundIconOff = document.getElementById('soundIconOff');
+
+    // Draw static header icons & modal icons
+    function drawFruitIconToCanvas(canvasId, type) {
+      const c = document.getElementById(canvasId);
+      if (!c) return;
+      const cCtx = c.getContext('2d');
+      cCtx.clearRect(0, 0, c.width, c.height);
+      const size = c.width;
+      drawFruitGraphics(cCtx, size / 2, size / 2, size * 0.75, type);
+    }
+
+    // Fruit Drawing Helper
+    function drawFruitGraphics(context, x, y, size, type) {
+      context.save();
+      context.translate(x, y);
+
+      if (type === 'apple') {
+        // --- Red Apple ---
+        const r = size * 0.42;
+        const grad = context.createRadialGradient(-r*0.3, -r*0.3, r*0.2, 0, 0, r*1.2);
+        grad.addColorStop(0, '#ff6b6b');
+        grad.addColorStop(1, '#e02828');
+
+        context.fillStyle = grad;
+        context.beginPath();
+        context.arc(-r * 0.35, 0, r * 0.75, 0, Math.PI * 2);
+        context.arc(r * 0.35, 0, r * 0.75, 0, Math.PI * 2);
+        context.fill();
+
+        // Stem
+        context.strokeStyle = '#6d4c41';
+        context.lineWidth = size * 0.08;
+        context.lineCap = 'round';
+        context.beginPath();
+        context.moveTo(0, -r * 0.5);
+        context.quadraticCurveTo(r * 0.2, -r * 1.1, r * 0.4, -r * 1.0);
+        context.stroke();
+
+        // Leaf
+        context.fillStyle = '#4caf50';
+        context.beginPath();
+        context.ellipse(r * 0.45, -r * 0.85, r * 0.35, r * 0.18, Math.PI / 4, 0, Math.PI * 2);
+        context.fill();
+
+        // Shine reflection
+        context.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        context.beginPath();
+        context.ellipse(-r * 0.4, -r * 0.3, r * 0.2, r * 0.1, -Math.PI / 4, 0, Math.PI * 2);
+        context.fill();
+
+      } else if (type === 'pineapple') {
+        // --- Pineapple (Nanas) ---
+        const r = size * 0.45;
+
+        // Pineapple Body (Golden Yellow Oval)
+        const grad = context.createLinearGradient(0, -r * 0.8, 0, r);
+        grad.addColorStop(0, '#fbc02d');
+        grad.addColorStop(1, '#f57f17');
+
+        context.fillStyle = grad;
+        context.beginPath();
+        context.ellipse(0, r * 0.15, r * 0.72, r * 0.85, 0, 0, Math.PI * 2);
+        context.fill();
+
+        // Pineapple criss-cross pattern
+        context.save();
+        context.beginPath();
+        context.ellipse(0, r * 0.15, r * 0.72, r * 0.85, 0, 0, Math.PI * 2);
+        context.clip();
+
+        context.strokeStyle = '#d97706';
+        context.lineWidth = size * 0.04;
+        const step = r * 0.45;
+        for (let i = -r * 2; i <= r * 2; i += step) {
+          context.beginPath();
+          context.moveTo(i - r, -r * 2);
+          context.lineTo(i + r * 2, r * 2);
+          context.stroke();
+
+          context.beginPath();
+          context.moveTo(i + r * 2, -r * 2);
+          context.lineTo(i - r, r * 2);
+          context.stroke();
+        }
+        context.restore();
+
+        // Crown Leaves on top
+        context.fillStyle = '#2e7d32';
+        context.beginPath();
+        context.moveTo(0, -r * 0.6);
+        context.quadraticCurveTo(-r * 0.7, -r * 1.1, -r * 0.6, -r * 1.4);
+        context.quadraticCurveTo(-r * 0.2, -r * 0.9, 0, -r * 0.5);
+        context.fill();
+
+        context.beginPath();
+        context.moveTo(0, -r * 0.6);
+        context.quadraticCurveTo(r * 0.7, -r * 1.1, r * 0.6, -r * 1.4);
+        context.quadraticCurveTo(r * 0.2, -r * 0.9, 0, -r * 0.5);
+        context.fill();
+
+        context.fillStyle = '#388e3c';
+        context.beginPath();
+        context.moveTo(-r * 0.2, -r * 0.6);
+        context.quadraticCurveTo(0, -r * 1.6, 0, -r * 1.6);
+        context.quadraticCurveTo(0, -r * 1.6, r * 0.2, -r * 0.6);
+        context.fill();
+
+      } else if (type === 'grape') {
+        // --- Grape Cluster (Anggur) ---
+        const r = size * 0.20;
+        const berryColor = '#8e24aa';
+        const berryColorDark = '#6a1b9a';
+        const berryShine = 'rgba(255, 255, 255, 0.4)';
+
+        // Stem
+        context.strokeStyle = '#5d4037';
+        context.lineWidth = size * 0.07;
+        context.lineCap = 'round';
+        context.beginPath();
+        context.moveTo(0, -size * 0.2);
+        context.quadraticCurveTo(-size * 0.08, -size * 0.45, 0, -size * 0.5);
+        context.stroke();
+
+        // Grape leaf
+        context.fillStyle = '#43a047';
+        context.beginPath();
+        context.ellipse(size * 0.16, -size * 0.38, size * 0.16, size * 0.08, Math.PI / 6, 0, Math.PI * 2);
+        context.fill();
+
+        // Berries
+        const berries = [
+          { x: -r * 1.3, y: -r * 0.4 },
+          { x: 0,        y: -r * 0.5 },
+          { x: r * 1.3,  y: -r * 0.4 },
+          { x: -r * 0.7, y: r * 0.7 },
+          { x: r * 0.7,  y: r * 0.7 },
+          { x: 0,        y: r * 1.7 }
+        ];
+
+        berries.forEach(b => {
+          const bg = context.createRadialGradient(b.x - r*0.3, b.y - r*0.3, r*0.1, b.x, b.y, r);
+          bg.addColorStop(0, '#ab47bc');
+          bg.addColorStop(0.7, berryColor);
+          bg.addColorStop(1, berryColorDark);
+
+          context.fillStyle = bg;
+          context.beginPath();
+          context.arc(b.x, b.y, r, 0, Math.PI * 2);
+          context.fill();
+
+          context.fillStyle = berryShine;
+          context.beginPath();
+          context.arc(b.x - r * 0.35, b.y - r * 0.35, r * 0.25, 0, Math.PI * 2);
+          context.fill();
+        });
+      }
+
+      context.restore();
+    }
+
+    // Render Icons into UI elements
+    function initIcons() {
+      drawFruitIconToCanvas('headerApple', 'apple');
+      drawFruitIconToCanvas('statApple', 'apple');
+      drawFruitIconToCanvas('statPineapple', 'pineapple');
+      drawFruitIconToCanvas('statGrape', 'grape');
+    }
+
+    // Difficulty Configurations
+    const DIFFICULTIES = {
+      easy: { name: 'Mudah', speed: 140, icon: '🐢', color: '#4ade80' },
+      normal: { name: 'Normal', speed: 100, icon: '🐇', color: '#60a5fa' },
+      hard: { name: 'Sulit', speed: 70, icon: '⚡', color: '#f59e0b' },
+      extreme: { name: 'Ekstrem', speed: 45, icon: '🔥', color: '#ef4444' }
+    };
+
+    let currentDifficulty = localStorage.getItem('snake_difficulty') || 'normal';
+    if (!DIFFICULTIES[currentDifficulty]) currentDifficulty = 'normal';
+
+    function getHighScore(diffKey) {
+      const stored = localStorage.getItem(`snake_high_score_${diffKey}`);
+      if (stored !== null) return parseInt(stored, 10) || 0;
+      // Migrasi skor dari sistem lama untuk tingkat normal
+      if (diffKey === 'normal') {
+        return parseInt(localStorage.getItem('snake_high_score') || '0', 10);
+      }
+      return 0;
+    }
+
+    function saveHighScore(diffKey, newScore) {
+      localStorage.setItem(`snake_high_score_${diffKey}`, newScore);
+      if (diffKey === 'normal') {
+        localStorage.setItem('snake_high_score', newScore);
+      }
+    }
+
+    // Game State Variables
+    let snake = [];
+    let direction = { x: 1, y: 0 };
+    let nextDirection = { x: 1, y: 0 };
+    let inputQueue = [];
+    let prevTail = null;
+    let justAteThisTick = false;
+    let isDying = false;
+    let dieStartTime = 0;
+    let dieCollisionTarget = null;
+    let lastFrameTime = performance.now();
+    let fruits = []; // Holds 3 fruits simultaneously: 1 Apple, 1 Pineapple, 1 Grape
+    let score = 0;
+    let highScore = getHighScore(currentDifficulty);
+    let eatenCounts = { apple: 0, pineapple: 0, grape: 0 };
+    let isGameOver = false;
+    let isPaused = false;
+    let isGameStarted = false;
+    let gameSpeed = DIFFICULTIES[currentDifficulty].speed; // ms per step
+    let lastTickTime = 0;
+    let animationFrameId = null;
+
+    // Floating score animation particles
+    let floatingTexts = [];
+
+    // Fruit juice particles and food pulses
+    let particles = [];
+    let foodPulses = [];
+
+    // 3 Fruit definitions (Apple, Pineapple, Grape)
+    const FRUIT_TYPES = [
+      { type: 'apple', points: 1 },
+      { type: 'pineapple', points: 1 },
+      { type: 'grape', points: 1 }
+    ];
+
+    function updateDifficultyUI() {
+      const info = DIFFICULTIES[currentDifficulty];
+      if (headerDiffIcon) headerDiffIcon.innerText = info.icon;
+      if (headerDiffName) headerDiffName.innerText = info.name;
+      if (headerDiffBtn) {
+        headerDiffBtn.title = `Kesulitan: ${info.name} (${info.speed}ms) - Klik untuk ganti`;
+      }
+
+      diffCards.forEach(card => {
+        const dKey = card.getAttribute('data-diff');
+        if (dKey === currentDifficulty) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+
+        const scoreBadge = document.getElementById(`diffScore_${dKey}`);
+        if (scoreBadge) {
+          scoreBadge.innerText = `Best: ${getHighScore(dKey)}`;
+        }
+      });
+
+      highScore = getHighScore(currentDifficulty);
+      highScoreText.innerText = highScore;
+      gameSpeed = info.speed;
+    }
+
+    function setDifficulty(diffKey) {
+      if (!DIFFICULTIES[diffKey]) return;
+      currentDifficulty = diffKey;
+      localStorage.setItem('snake_difficulty', diffKey);
+      updateDifficultyUI();
+    }
+
+    function showStartModal() {
+      isGameStarted = false;
+      isPaused = false;
+      updateDifficultyUI();
+      startModal.classList.add('active');
+      gameOverModal.classList.remove('active');
+      pauseModal.classList.remove('active');
+    }
+
+    function startGame() {
+      sound.init();
+      isGameStarted = true;
+      startModal.classList.remove('active');
+      resetGame();
+    }
+
+    function resetGame() {
+      const startX = 5;
+      const startY = Math.floor(ROWS / 2);
+      snake = [
+        { x: startX, y: startY },
+        { x: startX - 1, y: startY },
+        { x: startX - 2, y: startY },
+        { x: startX - 3, y: startY }
+      ];
+
+      direction = { x: 1, y: 0 };
+      nextDirection = { x: 1, y: 0 };
+      inputQueue = [];
+      prevTail = { x: startX - 4, y: startY };
+      justAteThisTick = false;
+      isDying = false;
+      dieCollisionTarget = null;
+
+      score = 0;
+      eatenCounts = { apple: 0, pineapple: 0, grape: 0 };
+      scoreText.innerText = '0';
+      isGameOver = false;
+      isPaused = false;
+      floatingTexts = [];
+      particles = [];
+      foodPulses = [];
+
+      gameOverModal.classList.remove('active');
+      pauseModal.classList.remove('active');
+
+      updateDifficultyUI();
+
+      // Spawn exactly 3 fruits: 1 Apple, 1 Pineapple, 1 Grape
+      spawnAllFruits();
+      lastTickTime = performance.now();
+      lastFrameTime = performance.now();
+    }
+
+    function spawnAllFruits() {
+      fruits = [];
+      FRUIT_TYPES.forEach(item => {
+        spawnSingleFruit(item.type, item.points);
+      });
+    }
+
+    function spawnSingleFruit(type, points) {
+      let emptyCells = [];
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const isOccupiedBySnake = snake.some(seg => seg.x === c && seg.y === r);
+          const isOccupiedByFruit = fruits.some(f => f.x === c && f.y === r);
+          if (!isOccupiedBySnake && !isOccupiedByFruit) {
+            emptyCells.push({ x: c, y: r });
+          }
+        }
+      }
+
+      if (emptyCells.length > 0) {
+        const choice = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        fruits.push({
+          x: choice.x,
+          y: choice.y,
+          type: type,
+          points: points,
+          spawnTime: performance.now(),
+          scale: 0
+        });
+      }
+    }
+
+    // Input Handling
+    function handleDirectionInput(dx, dy) {
+      sound.init();
+      if (isGameOver || !isGameStarted || isPaused) return;
+
+      // Evaluasi terhadap arah terakhir di antrean (atau arah saat ini jika antrean kosong)
+      const refDir = inputQueue.length > 0 ? inputQueue[inputQueue.length - 1] : direction;
+
+      // Cegah putar balik 180 derajat ke diri sendiri
+      if (dx !== 0 && refDir.x === -dx) return;
+      if (dy !== 0 && refDir.y === -dy) return;
+      // Abaikan jika arah yang ditekan sama persis dengan arah saat ini
+      if (dx === refDir.x && dy === refDir.y) return;
+
+      // Simpan maksimal 2 antrean input arah
+      if (inputQueue.length < 2) {
+        inputQueue.push({ x: dx, y: dy });
+        sound.playTurnSound();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      // Shortcut saat modal kesulitan aktif
+      if (!isGameStarted && startModal.classList.contains('active')) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          startGame();
+          return;
+        }
+        if (e.key === '1') { setDifficulty('easy'); return; }
+        if (e.key === '2') { setDifficulty('normal'); return; }
+        if (e.key === '3') { setDifficulty('hard'); return; }
+        if (e.key === '4') { setDifficulty('extreme'); return; }
+      }
+
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          e.preventDefault();
+          handleDirectionInput(0, -1);
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          e.preventDefault();
+          handleDirectionInput(0, 1);
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          e.preventDefault();
+          handleDirectionInput(-1, 0);
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          e.preventDefault();
+          handleDirectionInput(1, 0);
+          break;
+        case ' ':
+          e.preventDefault();
+          togglePause();
+          break;
+      }
+    });
+
+    // Mobile controls
+    document.getElementById('btnUp').addEventListener('click', () => handleDirectionInput(0, -1));
+    document.getElementById('btnDown').addEventListener('click', () => handleDirectionInput(0, 1));
+    document.getElementById('btnLeft').addEventListener('click', () => handleDirectionInput(-1, 0));
+    document.getElementById('btnRight').addEventListener('click', () => handleDirectionInput(1, 0));
+
+    // Touch Swipe Gesture support on canvas
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    canvas.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', (e) => {
+      if (isGameOver || isPaused) return;
+      const touch = e.changedTouches[0];
+      const diffX = touch.clientX - touchStartX;
+      const diffY = touch.clientY - touchStartY;
+      const minDistance = 25;
+
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (Math.abs(diffX) > minDistance) {
+          handleDirectionInput(diffX > 0 ? 1 : -1, 0);
+        }
+      } else {
+        if (Math.abs(diffY) > minDistance) {
+          handleDirectionInput(0, diffY > 0 ? 1 : -1);
+        }
+      }
+    }, { passive: true });
+
+    // UI Buttons
+    restartBtn.addEventListener('click', () => {
+      if (!isGameStarted) {
+        startGame();
+      } else {
+        resetGame();
+      }
+    });
+
+    playAgainBtn.addEventListener('click', () => {
+      isGameStarted = true;
+      resetGame();
+    });
+
+    changeDiffBtn.addEventListener('click', () => {
+      showStartModal();
+    });
+
+    headerDiffBtn.addEventListener('click', () => {
+      showStartModal();
+    });
+
+    startGameBtn.addEventListener('click', () => {
+      startGame();
+    });
+
+    diffCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const dKey = card.getAttribute('data-diff');
+        setDifficulty(dKey);
+      });
+    });
+
+    function togglePause() {
+      if (isGameOver || !isGameStarted) return;
+      isPaused = !isPaused;
+      if (isPaused) {
+        pauseModal.classList.add('active');
+      } else {
+        pauseModal.classList.remove('active');
+        const now = performance.now();
+        lastTickTime = now;
+        lastFrameTime = now;
+      }
+    }
+
+    pauseToggle.addEventListener('click', () => togglePause());
+    resumeBtn.addEventListener('click', () => togglePause());
+
+    soundToggle.addEventListener('click', () => {
+      const muted = sound.toggleMute();
+      soundIconOn.style.display = muted ? 'none' : 'block';
+      soundIconOff.style.display = muted ? 'block' : 'none';
+    });
+
+    // ==========================================
+    // PARTIKEL & EFEK MAKAN BUAH
+    // ==========================================
+    function spawnEatParticles(x, y, fruitType) {
+      const count = 12;
+      let colors = ['#ff5252', '#ff7b7b', '#ffffff'];
+      if (fruitType === 'pineapple') {
+        colors = ['#fbbf24', '#f59e0b', '#fef08a'];
+      } else if (fruitType === 'grape') {
+        colors = ['#c084fc', '#a855f7', '#e9d5ff'];
+      }
+
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.5;
+        const speed = 1.2 + Math.random() * 2.8;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: 2.2 + Math.random() * 2.6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1.0,
+          life: 0,
+          maxLife: 20 + Math.random() * 12
+        });
+      }
+    }
+
+    function updateParticles(dt) {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.life += dt / 16.6;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.05; // gravitasi halus
+        p.vx *= 0.98;
+        p.alpha = Math.max(0, 1 - (p.life / p.maxLife));
+        if (p.life >= p.maxLife) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function drawParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function updateFoodPulses(dt) {
+      const L = (snake.length + 1) * CELL_SIZE;
+      for (let i = foodPulses.length - 1; i >= 0; i--) {
+        const pulse = foodPulses[i];
+        pulse.dist += pulse.speed * (dt / 1000);
+        if (pulse.dist > L) {
+          foodPulses.splice(i, 1);
+        }
+      }
+    }
+
+    // ==========================================
+    // INTERPOLASI JALUR ULAR (SMOOTH PATH SAMPLING)
+    // ==========================================
+    function getSmoothSnakePath(progress) {
+      if (snake.length === 0) return [];
+
+      const p = Math.min(1, Math.max(0, progress));
+
+      if (isDying || snake.length < 2) {
+        return snake.map(seg => ({
+          x: (seg.x + 0.5) * CELL_SIZE,
+          y: (seg.y + 0.5) * CELL_SIZE
+        }));
+      }
+
+      // Interpolasi kepala: meluncur mulus dari snake[1] ke snake[0]
+      const hFrom = snake[1];
+      const hTo = snake[0];
+      const headX = (hFrom.x + (hTo.x - hFrom.x) * p + 0.5) * CELL_SIZE;
+      const headY = (hFrom.y + (hTo.y - hFrom.y) * p + 0.5) * CELL_SIZE;
+
+      const path = [{ x: headX, y: headY }];
+
+      // Titik sudut kisi (waypoints) dari snake[1] sampai snake[snake.length - 1]
+      for (let i = 1; i < snake.length; i++) {
+        path.push({
+          x: (snake[i].x + 0.5) * CELL_SIZE,
+          y: (snake[i].y + 0.5) * CELL_SIZE
+        });
+      }
+
+      // Jika tidak bertambah panjang di tick ini dan prevTail ada: ekor menyusut halus
+      if (!justAteThisTick && prevTail) {
+        const tFrom = prevTail;
+        const tTo = snake[snake.length - 1];
+        const tailX = (tFrom.x + (tTo.x - tFrom.x) * p + 0.5) * CELL_SIZE;
+        const tailY = (tFrom.y + (tTo.y - tFrom.y) * p + 0.5) * CELL_SIZE;
+        path.push({ x: tailX, y: tailY });
+      }
+
+      // Saring titik-titik bertumpuk agar garis tidak memiliki segmen panjang nol
+      const cleanPath = [path[0]];
+      for (let i = 1; i < path.length; i++) {
+        const last = cleanPath[cleanPath.length - 1];
+        const dx = path[i].x - last.x;
+        const dy = path[i].y - last.y;
+        if (dx * dx + dy * dy > 0.25) {
+          cleanPath.push(path[i]);
+        }
+      }
+
+      return cleanPath;
+    }
+
+    function getPathLength(path) {
+      let len = 0;
+      for (let i = 0; i < path.length - 1; i++) {
+        len += Math.hypot(path[i + 1].x - path[i].x, path[i + 1].y - path[i].y);
+      }
+      return len;
+    }
+
+    function getPointAndTangentAtDistance(path, targetDist) {
+      if (!path || path.length === 0) return null;
+      if (path.length === 1) {
+        return {
+          x: path[0].x,
+          y: path[0].y,
+          dirX: direction.x,
+          dirY: direction.y,
+          perpX: -direction.y,
+          perpY: direction.x
+        };
+      }
+
+      let accumulated = 0;
+      for (let i = 0; i < path.length - 1; i++) {
+        const p1 = path[i];
+        const p2 = path[i + 1];
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const segLen = Math.hypot(dx, dy);
+
+        if (segLen <= 0.0001) continue;
+
+        if (accumulated + segLen >= targetDist) {
+          const remain = targetDist - accumulated;
+          const u = remain / segLen;
+          const dirX = dx / segLen;
+          const dirY = dy / segLen;
+          return {
+            x: p1.x + dx * u,
+            y: p1.y + dy * u,
+            dirX: dirX,
+            dirY: dirY,
+            perpX: -dirY,
+            perpY: dirX
+          };
+        }
+        accumulated += segLen;
+      }
+
+      const last = path[path.length - 1];
+      const prev = path[path.length - 2];
+      const dx = last.x - prev.x;
+      const dy = last.y - prev.y;
+      const segLen = Math.hypot(dx, dy) || 1;
+      return {
+        x: last.x,
+        y: last.y,
+        dirX: dx / segLen,
+        dirY: dy / segLen,
+        perpX: -dy / segLen,
+        perpY: dx / segLen
+      };
+    }
+
+    // ==========================================
+    // LOGIKA PERMAINAN (UPDATE & GAME OVER)
+    // ==========================================
+    function update() {
+      if (inputQueue.length > 0) {
+        direction = inputQueue.shift();
+      }
+
+      const head = snake[0];
+      const newHead = {
+        x: head.x + direction.x,
+        y: head.y + direction.y
+      };
+
+      // Wall Collision
+      if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
+        triggerGameOver(newHead);
+        return;
+      }
+
+      // Check Fruit Collision
+      let eatenIndex = -1;
+      for (let i = 0; i < fruits.length; i++) {
+        if (fruits[i].x === newHead.x && fruits[i].y === newHead.y) {
+          eatenIndex = i;
+          break;
+        }
+      }
+
+      // Self Collision: Jika tidak makan, ekor akan maju sehingga kotak ekor aman
+      const willEat = (eatenIndex !== -1);
+      const selfCheckLimit = willEat ? snake.length : snake.length - 1;
+      for (let i = 0; i < selfCheckLimit; i++) {
+        if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
+          triggerGameOver(newHead);
+          return;
+        }
+      }
+
+      if (eatenIndex !== -1) {
+        const eatenFruit = fruits[eatenIndex];
+        justAteThisTick = true;
+        prevTail = null; // Ekor diam saat tubuh memanjang
+
+        score += eatenFruit.points;
+        eatenCounts[eatenFruit.type]++;
+        scoreText.innerText = score;
+
+        if (score > highScore) {
+          highScore = score;
+          highScoreText.innerText = highScore;
+          saveHighScore(currentDifficulty, highScore);
+        }
+
+        sound.playEatSound(eatenFruit.type);
+
+        // Angka skor melayang
+        floatingTexts.push({
+          text: `+${eatenFruit.points}`,
+          x: (newHead.x + 0.5) * CELL_SIZE,
+          y: (newHead.y + 0.5) * CELL_SIZE,
+          alpha: 1.0,
+          vy: -1.2
+        });
+
+        // Partikel ledakan sari buah
+        spawnEatParticles((newHead.x + 0.5) * CELL_SIZE, (newHead.y + 0.5) * CELL_SIZE, eatenFruit.type);
+
+        // Gelombang cerna makanan menyusuri tubuh ular
+        foodPulses.push({
+          dist: 0,
+          speed: CELL_SIZE * 7,
+          type: eatenFruit.type
+        });
+
+        // Respawn buah yang dimakan
+        const respawnType = eatenFruit.type;
+        const respawnPoints = eatenFruit.points;
+        fruits.splice(eatenIndex, 1);
+        spawnSingleFruit(respawnType, respawnPoints);
+
+        // Tambah kepala baru tanpa memotong ekor (ular memanjang)
+        snake.unshift(newHead);
+      } else {
+        justAteThisTick = false;
+        prevTail = snake[snake.length - 1];
+        snake.pop();
+        snake.unshift(newHead);
+      }
+    }
+
+    function triggerGameOver(collisionTarget) {
+      isGameOver = true;
+      isDying = true;
+      dieStartTime = performance.now();
+      dieCollisionTarget = collisionTarget;
+      sound.playDieSound();
+
+      finalScore.innerText = score;
+      bestScore.innerText = highScore;
+      countApple.innerText = eatenCounts.apple;
+      countPineapple.innerText = eatenCounts.pineapple;
+      countGrape.innerText = eatenCounts.grape;
+
+      // Update skor terbaik pada badge
+      const badge = document.getElementById(`diffScore_${currentDifficulty}`);
+      if (badge) badge.innerText = `Best: ${highScore}`;
+
+      // Tampilkan modal setelah animasi tabrakan selesai
+      setTimeout(() => {
+        gameOverModal.classList.add('active');
+      }, 550);
+    }
+
+    // ==========================================
+    // RENDER FUNCTIONS
+    // ==========================================
+
+    function drawBoard() {
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          ctx.fillStyle = (r + c) % 2 === 0 ? COLOR_BOARD_LIGHT : COLOR_BOARD_DARK;
+          ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+      }
+    }
+
+    function drawFruits() {
+      const now = performance.now();
+      fruits.forEach(fruit => {
+        if (fruit.scale < 1) {
+          fruit.scale = Math.min(1, fruit.scale + 0.12);
+        }
+
+        // Animasi floating bob & pernapasan halus
+        const bob = Math.sin(now * 0.005 + fruit.x * 1.7 + fruit.y * 2.3) * 2.2;
+        const pulse = 1 + Math.sin(now * 0.007 + fruit.x) * 0.03;
+
+        const cx = (fruit.x + 0.5) * CELL_SIZE;
+        const cy = (fruit.y + 0.5) * CELL_SIZE + bob;
+        const baseSize = CELL_SIZE * 0.88 * fruit.scale * pulse;
+
+        drawFruitGraphics(ctx, cx, cy, baseSize, fruit.type);
+      });
+    }
+
+    function drawSnake(progress = 1) {
+      if (snake.length === 0) return;
+
+      const path = getSmoothSnakePath(progress);
+      if (path.length < 1) return;
+
+      const totalLen = getPathLength(path);
+
+      // 1. Badan Ular Halus Berkelanjutan (Continuous rounded body)
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = CELL_SIZE * 0.82;
+      ctx.strokeStyle = COLOR_SNAKE;
+
+      ctx.beginPath();
+      ctx.moveTo(path[0].x, path[0].y);
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x, path[i].y);
+      }
+      ctx.stroke();
+
+      // 2. Gelombang Makanan (Food Pulses yang Meluncur di Badan Ular)
+      foodPulses.forEach(pulse => {
+        if (pulse.dist <= totalLen) {
+          const pt = getPointAndTangentAtDistance(path, pulse.dist);
+          if (pt) {
+            let glowCol = 'rgba(255, 107, 107, 0.7)';
+            if (pulse.type === 'pineapple') glowCol = 'rgba(251, 192, 45, 0.7)';
+            else if (pulse.type === 'grape') glowCol = 'rgba(171, 71, 188, 0.7)';
+
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, CELL_SIZE * 0.44, 0, Math.PI * 2);
+            ctx.fillStyle = COLOR_SNAKE;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, CELL_SIZE * 0.28, 0, Math.PI * 2);
+            ctx.fillStyle = glowCol;
+            ctx.fill();
+          }
+        }
+      });
+
+      // 3. Corak Badan Ular: Belang Biru & Sisik Berlian Mengalir Halus
+      const numPatterns = Math.floor((totalLen - CELL_SIZE * 0.35) / CELL_SIZE);
+      for (let k = 1; k <= numPatterns; k++) {
+        const dist = k * CELL_SIZE;
+        const pt = getPointAndTangentAtDistance(path, dist);
+        if (!pt) continue;
+
+        // Belang Melintang pada segmen ganjil
+        if (k % 2 === 1) {
+          ctx.save();
+          ctx.strokeStyle = '#2b5ec4'; // Blue stripe accent
+          ctx.lineWidth = CELL_SIZE * 0.22;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          const halfW = CELL_SIZE * 0.33;
+          ctx.moveTo(pt.x - pt.perpX * halfW, pt.y - pt.perpY * halfW);
+          ctx.lineTo(pt.x + pt.perpX * halfW, pt.y + pt.perpY * halfW);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Sisik Berlian (Diamond Scales)
+        ctx.save();
+        ctx.translate(pt.x, pt.y);
+        const angle = Math.atan2(pt.dirY, pt.dirX);
+        ctx.rotate(angle);
+
+        const dW = CELL_SIZE * 0.20;
+        const dH = CELL_SIZE * 0.13;
+
+        // Outer Diamond
+        ctx.fillStyle = (k % 2 === 0) ? '#93c5fd' : '#bfdbfe';
+        ctx.beginPath();
+        ctx.moveTo(dW, 0);
+        ctx.lineTo(0, dH);
+        ctx.lineTo(-dW, 0);
+        ctx.lineTo(0, -dH);
+        ctx.closePath();
+        ctx.fill();
+
+        // Inner Core (titik tengah putih)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, CELL_SIZE * 0.05, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // 4. Kepala Ular, Lidah, & Mata
+      let headCx = path[0].x;
+      let headCy = path[0].y;
+
+      // Bonk / Shake effect saat kalah
+      if (isDying) {
+        const elapsed = performance.now() - dieStartTime;
+        if (elapsed < 350) {
+          const wobble = Math.sin(elapsed * 0.06) * Math.exp(-elapsed * 0.01) * 3.5;
+          headCx += direction.x * wobble;
+          headCy += direction.y * wobble;
+        }
+      }
+
+      // Lingkaran kepala bulat
+      ctx.fillStyle = COLOR_SNAKE;
+      ctx.beginPath();
+      ctx.arc(headCx, headCy, CELL_SIZE * 0.41, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cari buah terdekat untuk pelacakan pupil mata & reaksi lapar
+      let closestFruit = null;
+      let minDist = Infinity;
+      for (let i = 0; i < fruits.length; i++) {
+        const f = fruits[i];
+        const fx = (f.x + 0.5) * CELL_SIZE;
+        const fy = (f.y + 0.5) * CELL_SIZE;
+        const d = Math.hypot(fx - headCx, fy - headCy);
+        if (d < minDist) {
+          minDist = d;
+          closestFruit = { x: fx, y: fy, dist: d };
+        }
+      }
+
+      // --- Lidah Merah Bercabang (Red Forked Tongue) ---
+      if (!isDying) {
+        const isNearFruit = closestFruit && closestFruit.dist < CELL_SIZE * 2.2;
+        const flickFreq = isNearFruit ? 0.02 : 0.012;
+        const flickTime = Math.sin(performance.now() * flickFreq);
+        const threshold = isNearFruit ? -0.5 : -0.3;
+
+        if (flickTime > threshold) {
+          const ext = Math.max(0, flickTime);
+          const tongueLen = CELL_SIZE * (0.32 + ext * 0.32);
+          const forkLen = CELL_SIZE * 0.16;
+          const forkSpread = CELL_SIZE * 0.13;
+
+          const startX = headCx + direction.x * (CELL_SIZE * 0.38);
+          const startY = headCy + direction.y * (CELL_SIZE * 0.38);
+
+          const perpX = -direction.y;
+          const perpY = direction.x;
+
+          const tipX = startX + direction.x * tongueLen;
+          const tipY = startY + direction.y * tongueLen;
+
+          ctx.save();
+          ctx.strokeStyle = '#ef4444'; // Lidah merah
+          ctx.lineWidth = 2.8;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          // Batang lidah
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(tipX, tipY);
+          // Cabang kiri
+          ctx.lineTo(tipX + direction.x * forkLen + perpX * forkSpread, tipY + direction.y * forkLen + perpY * forkSpread);
+          ctx.stroke();
+
+          // Cabang kanan
+          ctx.beginPath();
+          ctx.moveTo(tipX, tipY);
+          ctx.lineTo(tipX + direction.x * forkLen - perpX * forkSpread, tipY + direction.y * forkLen - perpY * forkSpread);
+          ctx.stroke();
+
+          ctx.restore();
+        }
+      }
+
+      // --- Mata Ular (Eyes) ---
+      const eyeOffset = CELL_SIZE * 0.22;
+      const eyeRadius = CELL_SIZE * 0.15;
+      const pupilRadius = CELL_SIZE * 0.08;
+
+      let eye1 = { x: 0, y: 0 };
+      let eye2 = { x: 0, y: 0 };
+
+      if (direction.x !== 0) {
+        eye1 = { x: headCx + direction.x * (CELL_SIZE * 0.12), y: headCy - eyeOffset };
+        eye2 = { x: headCx + direction.x * (CELL_SIZE * 0.12), y: headCy + eyeOffset };
+      } else {
+        eye1 = { x: headCx - eyeOffset, y: headCy + direction.y * (CELL_SIZE * 0.12) };
+        eye2 = { x: headCx + eyeOffset, y: headCy + direction.y * (CELL_SIZE * 0.12) };
+      }
+
+      // Sclera (Putih Mata)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(eye1.x, eye1.y, eyeRadius, 0, Math.PI * 2);
+      ctx.arc(eye2.x, eye2.y, eyeRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (isDying) {
+        // Mata silang pusing ("X" Dizzy Eyes saat kalah)
+        ctx.save();
+        ctx.strokeStyle = '#1e3a8a';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        const dR = eyeRadius * 0.65;
+
+        // Eye 1 X
+        ctx.beginPath();
+        ctx.moveTo(eye1.x - dR, eye1.y - dR); ctx.lineTo(eye1.x + dR, eye1.y + dR);
+        ctx.moveTo(eye1.x + dR, eye1.y - dR); ctx.lineTo(eye1.x - dR, eye1.y + dR);
+        // Eye 2 X
+        ctx.moveTo(eye2.x - dR, eye2.y - dR); ctx.lineTo(eye2.x + dR, eye2.y + dR);
+        ctx.moveTo(eye2.x + dR, eye2.y - dR); ctx.lineTo(eye2.x - dR, eye2.y + dR);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // Pupil Dinamis: Melirik ke buah terdekat atau ke arah gerakan
+        let pupilShiftX = direction.x * 2.4;
+        let pupilShiftY = direction.y * 2.4;
+
+        if (closestFruit && closestFruit.dist < CELL_SIZE * 4.2) {
+          const angle = Math.atan2(closestFruit.y - headCy, closestFruit.x - headCx);
+          pupilShiftX = Math.cos(angle) * 3.0;
+          pupilShiftY = Math.sin(angle) * 3.0;
+        }
+
+        ctx.fillStyle = '#1e3a8a';
+        ctx.beginPath();
+        ctx.arc(eye1.x + pupilShiftX, eye1.y + pupilShiftY, pupilRadius, 0, Math.PI * 2);
+        ctx.arc(eye2.x + pupilShiftX, eye2.y + pupilShiftY, pupilRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function drawFloatingTexts() {
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.vy;
+        ft.alpha -= 0.025;
+
+        if (ft.alpha <= 0) {
+          floatingTexts.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.font = 'bold 16px "Segoe UI", sans-serif';
+        ctx.fillStyle = `rgba(255, 255, 255, ${ft.alpha})`;
+        ctx.strokeStyle = `rgba(0, 0, 0, ${ft.alpha * 0.5})`;
+        ctx.lineWidth = 3;
+        ctx.textAlign = 'center';
+        ctx.strokeText(ft.text, ft.x, ft.y);
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      }
+    }
+
+    // Main Game Render Loop (60+ FPS Smooth Interpolation)
+    function gameLoop(currentTime) {
+      const dt = Math.min(50, currentTime - (lastFrameTime || currentTime));
+      lastFrameTime = currentTime;
+
+      if (!isGameOver && !isPaused && isGameStarted) {
+        const delta = currentTime - lastTickTime;
+        if (delta >= gameSpeed) {
+          update();
+          lastTickTime = currentTime - (delta % gameSpeed);
+        }
+      }
+
+      // Update partikel dan gelombang makanan
+      updateParticles(dt);
+      updateFoodPulses(dt);
+
+      // Hitung progress interpolasi gerakan (0.0 sampai 1.0)
+      let progress = 1.0;
+      if (!isGameOver && !isPaused && isGameStarted) {
+        progress = Math.min(1.0, Math.max(0.0, (currentTime - lastTickTime) / gameSpeed));
+      }
+
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      drawBoard();
+      drawFruits();
+      drawSnake(progress);
+      drawParticles();
+      drawFloatingTexts();
+
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    // Initialize Game
+    initIcons();
+    resetGame();
+    showStartModal();
+    animationFrameId = requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
