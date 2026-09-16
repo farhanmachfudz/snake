@@ -595,7 +595,7 @@
        GOOGLE SNAKE CLONE - SINGLE FILE
        Features:
        - 3 active fruits: Apel (Apple), Nanas (Pineapple), Anggur (Grape)
-       - Google Doodle Snake aesthetics: Checkered green board, blue rounded snake with animated eyes
+       - Google Doodle Snake aesthetics: Checkered green board, black & yellow rounded snake with animated eyes
        - Built-in sound generator using Web Audio API (no external sound files required)
        - Touch & keyboard responsive controls
        ========================================================================== */
@@ -719,7 +719,7 @@
     const COLOR_BOARD_DARK = '#a2d149';
 
     // Snake colors
-    const COLOR_SNAKE = '#4682ea'; // Google Snake blue
+    const COLOR_SNAKE = '#18181b'; // Hitam-Kuning (Black & Yellow Snake)
 
     // Canvas setup
     const canvas = document.getElementById('gameCanvas');
@@ -1634,23 +1634,32 @@
         }
       });
 
-      // 3. Corak Badan Ular: Belang Biru & Sisik Berlian Mengalir Halus
+      // 3. Corak Badan Ular: Belang Hitam-Kuning & Sisik Berlian Mengalir Halus
       const numPatterns = Math.floor((totalLen - CELL_SIZE * 0.35) / CELL_SIZE);
       for (let k = 1; k <= numPatterns; k++) {
         const dist = k * CELL_SIZE;
         const pt = getPointAndTangentAtDistance(path, dist);
         if (!pt) continue;
 
-        // Belang Melintang pada segmen ganjil
+        // Belang Melintang Kuning Cerah pada segmen ganjil (Banded Krait Style)
         if (k % 2 === 1) {
           ctx.save();
-          ctx.strokeStyle = '#2b5ec4'; // Blue stripe accent
-          ctx.lineWidth = CELL_SIZE * 0.22;
+          ctx.strokeStyle = '#facc15'; // Kuning menyala
+          ctx.lineWidth = CELL_SIZE * 0.38;
           ctx.lineCap = 'round';
           ctx.beginPath();
-          const halfW = CELL_SIZE * 0.33;
+          const halfW = CELL_SIZE * 0.34;
           ctx.moveTo(pt.x - pt.perpX * halfW, pt.y - pt.perpY * halfW);
           ctx.lineTo(pt.x + pt.perpX * halfW, pt.y + pt.perpY * halfW);
+          ctx.stroke();
+
+          // Garis aksen kuning muda di tengah belang
+          ctx.strokeStyle = '#fef08a';
+          ctx.lineWidth = CELL_SIZE * 0.12;
+          ctx.beginPath();
+          const innerW = CELL_SIZE * 0.24;
+          ctx.moveTo(pt.x - pt.perpX * innerW, pt.y - pt.perpY * innerW);
+          ctx.lineTo(pt.x + pt.perpX * innerW, pt.y + pt.perpY * innerW);
           ctx.stroke();
           ctx.restore();
         }
@@ -1664,21 +1673,39 @@
         const dW = CELL_SIZE * 0.20;
         const dH = CELL_SIZE * 0.13;
 
-        // Outer Diamond
-        ctx.fillStyle = (k % 2 === 0) ? '#93c5fd' : '#bfdbfe';
-        ctx.beginPath();
-        ctx.moveTo(dW, 0);
-        ctx.lineTo(0, dH);
-        ctx.lineTo(-dW, 0);
-        ctx.lineTo(0, -dH);
-        ctx.closePath();
-        ctx.fill();
+        if (k % 2 === 0) {
+          // Sisik berlian kuning emas di atas segmen hitam
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath();
+          ctx.moveTo(dW, 0);
+          ctx.lineTo(0, dH);
+          ctx.lineTo(-dW, 0);
+          ctx.lineTo(0, -dH);
+          ctx.closePath();
+          ctx.fill();
 
-        // Inner Core (titik tengah putih)
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(0, 0, CELL_SIZE * 0.05, 0, Math.PI * 2);
-        ctx.fill();
+          // Titik pusat putih berkilau
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(0, 0, CELL_SIZE * 0.05, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Sisik berlian hitam di atas belang kuning
+          ctx.fillStyle = '#18181b';
+          ctx.beginPath();
+          ctx.moveTo(dW * 0.75, 0);
+          ctx.lineTo(0, dH * 0.75);
+          ctx.lineTo(-dW * 0.75, 0);
+          ctx.lineTo(0, -dH * 0.75);
+          ctx.closePath();
+          ctx.fill();
+
+          // Titik pusat kuning emas
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath();
+          ctx.arc(0, 0, CELL_SIZE * 0.04, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
         ctx.restore();
       }
@@ -1697,11 +1724,26 @@
         }
       }
 
-      // Lingkaran kepala bulat
+      // Lingkaran kepala bulat hitam
       ctx.fillStyle = COLOR_SNAKE;
       ctx.beginPath();
       ctx.arc(headCx, headCy, CELL_SIZE * 0.41, 0, Math.PI * 2);
       ctx.fill();
+
+      // Corak mahkota / v-chevron kuning di dahi kepala ular
+      ctx.save();
+      ctx.translate(headCx, headCy);
+      const headAngle = Math.atan2(direction.y, direction.x);
+      ctx.rotate(headAngle);
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.moveTo(CELL_SIZE * 0.14, 0);
+      ctx.lineTo(-CELL_SIZE * 0.12, -CELL_SIZE * 0.16);
+      ctx.lineTo(-CELL_SIZE * 0.03, 0);
+      ctx.lineTo(-CELL_SIZE * 0.12, CELL_SIZE * 0.16);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
 
       // Cari buah terdekat untuk pelacakan pupil mata & reaksi lapar
       let closestFruit = null;
@@ -1789,7 +1831,7 @@
       if (isDying) {
         // Mata silang pusing ("X" Dizzy Eyes saat kalah)
         ctx.save();
-        ctx.strokeStyle = '#1e3a8a';
+        ctx.strokeStyle = '#facc15'; // Silang kuning terang
         ctx.lineWidth = 2.5;
         ctx.lineCap = 'round';
         const dR = eyeRadius * 0.65;
@@ -1814,10 +1856,17 @@
           pupilShiftY = Math.sin(angle) * 3.0;
         }
 
-        ctx.fillStyle = '#1e3a8a';
+        ctx.fillStyle = '#09090b'; // Pupil hitam pekat
         ctx.beginPath();
         ctx.arc(eye1.x + pupilShiftX, eye1.y + pupilShiftY, pupilRadius, 0, Math.PI * 2);
         ctx.arc(eye2.x + pupilShiftX, eye2.y + pupilShiftY, pupilRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Kilau mata putih (catchlight)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(eye1.x + pupilShiftX - 0.8, eye1.y + pupilShiftY - 0.8, pupilRadius * 0.35, 0, Math.PI * 2);
+        ctx.arc(eye2.x + pupilShiftX - 0.8, eye2.y + pupilShiftY - 0.8, pupilRadius * 0.35, 0, Math.PI * 2);
         ctx.fill();
       }
 
