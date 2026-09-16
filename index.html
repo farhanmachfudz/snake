@@ -118,14 +118,20 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      width: 100%;
+      max-width: 100%;
     }
 
-    canvas {
+    #gameCanvas {
       display: block;
       border-radius: 6px;
       background: #a2d149;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
       image-rendering: pixelated;
+      max-width: 100%;
+      height: auto;
+      aspect-ratio: 595 / 525;
+      touch-action: none;
     }
 
     /* Overlay / Dialogs */
@@ -396,32 +402,62 @@
       transform: scale(0.96);
     }
 
-    /* Mobile Controls */
+    /* Coin SVG Component */
+    .coin-svg {
+      display: inline-block;
+      vertical-align: -0.22em;
+      width: 1.15em;
+      height: 1.15em;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+      flex-shrink: 0;
+    }
+
+    /* Auto Submit Leaderboard in Game Over Modal */
+    .auto-submit-area {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: left;
+      margin-top: 4px;
+    }
+    .auto-user-pill {
+      font-size: 13px;
+      color: #ffd152;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    /* Mobile Controls (Ergonomic Inverted-T layout) */
     .mobile-controls {
       display: none;
-      margin-top: 16px;
-      grid-template-columns: repeat(3, 60px);
-      grid-template-rows: repeat(3, 60px);
-      gap: 10px;
+      margin-top: 12px;
+      grid-template-columns: repeat(3, 62px);
+      grid-template-rows: repeat(2, 52px);
+      gap: 8px;
       justify-content: center;
+      touch-action: manipulation;
     }
 
     .touch-btn {
       background: #334155;
       color: white;
       border: 2px solid #475569;
-      border-radius: 14px;
-      font-size: 24px;
+      border-radius: 12px;
+      font-size: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       touch-action: manipulation;
-      transition: background 0.1s;
+      transition: background 0.1s, transform 0.08s;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .touch-btn:active {
       background: #4a75f0;
+      transform: scale(0.95);
     }
 
     #btnUp { grid-column: 2; grid-row: 1; }
@@ -432,6 +468,128 @@
     @media (max-width: 768px) {
       .mobile-controls {
         display: grid;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 8px 6px;
+      }
+      .game-wrapper {
+        border-width: 3px;
+        border-radius: 14px;
+      }
+      .game-header {
+        height: auto;
+        min-height: 48px;
+        padding: 8px 10px;
+        gap: 6px;
+      }
+      .score-container {
+        gap: 8px;
+        font-size: 16px;
+      }
+      .fruit-icon {
+        width: 22px;
+        height: 22px;
+      }
+      .diff-pill-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+      .header-actions {
+        gap: 5px;
+      }
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+      }
+      .btn-icon svg {
+        width: 16px;
+        height: 16px;
+      }
+      .btn-user {
+        padding: 0 8px;
+        font-size: 11px;
+        height: 32px;
+      }
+      .user-badge {
+        max-width: 58px;
+      }
+      .canvas-container {
+        padding: 8px;
+      }
+      .card-modal {
+        padding: 16px 18px;
+        width: 95%;
+        max-height: 90vh;
+      }
+      .card-modal h2 {
+        font-size: 22px;
+        margin-bottom: 8px;
+      }
+      .stats-row {
+        margin: 10px 0;
+        padding: 8px;
+      }
+      .stat-val {
+        font-size: 18px;
+      }
+      .stat-label {
+        font-size: 11px;
+      }
+      .modal-actions {
+        gap: 8px;
+      }
+      .modal-actions button {
+        font-size: 13px;
+        padding: 9px 14px;
+      }
+      .shop-modal {
+        padding: 14px 16px;
+      }
+      .shop-title-area h2 {
+        font-size: 20px;
+      }
+      .shop-preview-box {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+      .shop-preview-info {
+        text-align: center;
+      }
+      .shop-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-height: 200px;
+      }
+      .difficulty-grid {
+        gap: 8px;
+      }
+      .diff-card {
+        padding: 8px;
+      }
+      .diff-icon {
+        font-size: 20px;
+      }
+      .diff-name {
+        font-size: 13px;
+      }
+      .diff-desc {
+        font-size: 10px;
+      }
+      .user-modal {
+        padding: 16px 18px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      #headerDiffName {
+        display: none;
+      }
+      .score-container {
+        font-size: 14px;
+        gap: 6px;
       }
     }
 
@@ -683,6 +841,376 @@
     .feedback-success { color: #86efac; }
     .feedback-error { color: #fca5a5; }
     .feedback-loading { color: #ffd152; }
+
+    /* Header Coin & User Badges */
+    .btn-user {
+      position: relative;
+      width: auto;
+      min-width: 38px;
+      padding: 0 10px;
+      border-radius: 20px;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .user-badge {
+      display: inline-block;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Start Modal Extra Actions */
+    .start-actions-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      margin-top: 14px;
+      width: 100%;
+    }
+    .start-extra-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Shop Modal */
+    .shop-modal {
+      width: 520px;
+      max-width: 95%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 24px;
+      overflow: hidden;
+    }
+    .shop-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+    .shop-title-area h2 {
+      margin-bottom: 2px;
+      font-size: 24px;
+    }
+    .shop-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.3);
+      padding: 8px 14px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    .shop-user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-text-action {
+      background: none;
+      border: none;
+      color: #93c5fd;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+      font-family: inherit;
+    }
+    .btn-text-action:hover {
+      color: #bfdbfe;
+    }
+    .shop-coins-badge {
+      background: rgba(250, 204, 21, 0.2);
+      border: 1px solid #facc15;
+      color: #fef08a;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .shop-preview-box {
+      background: rgba(0,0,0,0.35);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+    }
+    .shop-preview-box canvas {
+      background: #27272a;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+    .shop-preview-info {
+      text-align: left;
+      flex: 1;
+    }
+    .preview-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffd152;
+      margin-bottom: 3px;
+    }
+    .preview-desc {
+      font-size: 12px;
+      color: #d1d5db;
+      line-height: 1.3;
+    }
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 250px;
+      padding-right: 4px;
+      margin-bottom: 10px;
+    }
+    .shop-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+    .shop-grid::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+      border-radius: 3px;
+    }
+    .shop-grid::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.25);
+      border-radius: 3px;
+    }
+    .skin-card {
+      background: rgba(0,0,0,0.25);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .skin-card:hover {
+      background: rgba(0,0,0,0.4);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .skin-card.selected {
+      border-color: #ffd152;
+      background: rgba(255, 209, 82, 0.15);
+    }
+    .skin-card.active-skin {
+      border-color: #4ade80;
+    }
+    .skin-card-icon {
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+    .skin-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    .skin-card-tag {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+    .btn-skin-action {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .btn-skin-buy {
+      background: #eab308;
+      color: #422006;
+    }
+    .btn-skin-buy:hover:not(:disabled) {
+      background: #facc15;
+    }
+    .btn-skin-buy:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-skin-equip {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-skin-equip:hover {
+      background: #2563eb;
+    }
+    .btn-skin-equipped {
+      background: #22c55e;
+      color: #052e16;
+      cursor: default;
+    }
+
+    /* User Account Modal */
+    .user-modal {
+      width: 380px;
+      max-width: 95%;
+      padding: 22px 26px;
+    }
+    .user-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .user-modal-header h2 {
+      margin-bottom: 0;
+      font-size: 24px;
+    }
+    .auth-tabs {
+      display: flex;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 14px;
+      gap: 4px;
+    }
+    .auth-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .auth-tab.active {
+      background: #4a75f0;
+      color: white;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #c9e69c;
+      margin-bottom: 4px;
+    }
+    .form-group input {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      border-color: #ffd152;
+    }
+    .btn-block {
+      width: 100%;
+      margin-top: 6px;
+    }
+    .auth-footer-tip {
+      font-size: 11px;
+      color: #d1d5db;
+      margin-top: 14px;
+      background: rgba(255,255,255,0.06);
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .user-profile-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .user-avatar-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #27272a;
+      border: 3px solid #ffd152;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .user-status-pill {
+      font-size: 11px;
+      color: #86efac;
+      background: rgba(34, 197, 94, 0.2);
+      padding: 2px 10px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+    .user-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      width: 100%;
+      background: rgba(0,0,0,0.25);
+      padding: 12px 16px;
+      border-radius: 10px;
+      text-align: left;
+    }
+    .u-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+    .u-lbl {
+      color: #cbd5e1;
+    }
+    .u-val {
+      font-weight: 700;
+      color: #ffd152;
+    }
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
   </style>
 </head>
 <body>
@@ -692,12 +1220,23 @@
     <div class="game-header">
       <div class="score-container">
         <!-- Main Apple / Total Counter -->
-        <div class="fruit-counter">
+        <div class="fruit-counter" title="Skor Saat Ini">
           <canvas id="headerApple" width="28" height="28" class="fruit-icon"></canvas>
           <span id="scoreText">0</span>
         </div>
+        <!-- Coins Counter -->
+        <div class="fruit-counter" style="color: #facc15; font-size: 18px;" title="Saldo Koin (dapat dari skor)">
+          <svg class="coin-svg" viewBox="0 0 24 24" width="22" height="22">
+            <circle cx="12" cy="12" r="10" fill="#f59e0b" stroke="#b45309" stroke-width="1.2"/>
+            <circle cx="12" cy="12" r="8" fill="#fbbf24"/>
+            <circle cx="12" cy="12" r="6.2" fill="none" stroke="#fef08a" stroke-width="0.8" stroke-dasharray="2 1.5"/>
+            <polygon points="12,6.5 13.5,10.2 17.5,12 13.5,13.8 12,17.5 10.5,13.8 6.5,12 10.5,10.2" fill="#fef9c3"/>
+            <circle cx="12" cy="12" r="1.6" fill="#ffffff"/>
+          </svg>
+          <span id="headerCoinCount">0</span>
+        </div>
         <!-- Trophy High Score -->
-        <div class="fruit-counter" style="color: #ffd152; font-size: 18px;">
+        <div class="fruit-counter" style="color: #ffd152; font-size: 18px;" title="Skor Tertinggi">
           <svg style="width:20px;height:20px;fill:#ffd152;margin-right:2px;" viewBox="0 0 24 24">
             <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
           </svg>
@@ -711,8 +1250,17 @@
         </button>
       </div>
 
-      <!-- Actions: Mute & Reset/Pause & Leaderboard -->
+      <!-- Actions: Mute & Reset/Pause & Leaderboard & Shop & Profile -->
       <div class="header-actions">
+        <button id="shopToggle" class="btn-icon" title="Toko Kostum Ular (Belanja Kostum)">
+          <span style="font-size: 18px;">🛍️</span>
+        </button>
+
+        <button id="userProfileToggle" class="btn-icon btn-user" title="Akun Pengguna">
+          <span style="font-size: 17px;">👤</span>
+          <span id="headerUserBadge" class="user-badge">Masuk</span>
+        </button>
+
         <button id="leaderboardToggle" class="btn-icon" title="Papan Peringkat Global">
           <svg viewBox="0 0 24 24">
             <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
@@ -785,7 +1333,13 @@
             </button>
           </div>
 
-          <button id="startGameBtn" class="btn-primary btn-start" type="button">Mulai Bermain 🚀</button>
+          <div class="start-actions-row">
+            <button id="startGameBtn" class="btn-primary btn-start" type="button">Mulai Bermain 🚀</button>
+            <div class="start-extra-btns">
+              <button id="startShopBtn" class="btn-secondary" type="button">🛍️ Toko Kostum</button>
+              <button id="startUserBtn" class="btn-secondary" type="button">👤 Akun Pemain</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -797,6 +1351,12 @@
             <div class="stat-item">
               <span class="stat-label">Skor</span>
               <span id="finalScore" class="stat-val">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Koin Didapat</span>
+              <span id="finalCoins" class="stat-val" style="color: #facc15; display: inline-flex; align-items: center; gap: 4px;">
+                +0 <svg class="coin-svg" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="10" fill="#f59e0b" stroke="#b45309" stroke-width="1.2"/><circle cx="12" cy="12" r="8" fill="#fbbf24"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="#fef08a" stroke-width="0.8" stroke-dasharray="2 1.5"/><polygon points="12,6.5 13.5,10.2 17.5,12 13.5,13.8 12,17.5 10.5,13.8 6.5,12 10.5,10.2" fill="#fef9c3"/><circle cx="12" cy="12" r="1.6" fill="#ffffff"/></svg>
+              </span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Terbaik</span>
@@ -813,20 +1373,149 @@
           <!-- Global High Score Submission Section -->
           <div class="global-submit-section" id="globalSubmitSection">
             <div class="global-submit-title">
-              <span>🏆 Kirim Skor ke Leaderboard Global</span>
+              <span>🏆 Papan Peringkat Global</span>
               <span id="submitDiffTag" style="font-size: 11px; opacity: 0.85;"></span>
             </div>
-            <div class="global-input-group">
-              <input type="text" id="playerNameInput" placeholder="Ketik namamu..." maxlength="25" autocomplete="off" spellcheck="false" />
-              <button id="submitScoreBtn" class="btn-submit-score" type="button">Kirim</button>
+
+            <!-- Auto Submit View for Logged-In User -->
+            <div id="autoSubmitArea" class="auto-submit-area" style="display: none;">
+              <div class="auto-user-pill">
+                <span>👤 Akun: <strong id="autoSubmitUsername">Pemain</strong></span>
+              </div>
+              <div id="autoSubmitFeedback" class="submit-feedback"></div>
             </div>
-            <div id="submitFeedback" class="submit-feedback"></div>
+
+            <!-- Manual Submit View for Guest -->
+            <div id="manualSubmitArea" class="manual-submit-area">
+              <div class="global-input-group">
+                <input type="text" id="playerNameInput" placeholder="Ketik namamu..." maxlength="25" autocomplete="off" spellcheck="false" />
+                <button id="submitScoreBtn" class="btn-submit-score" type="button">Kirim</button>
+              </div>
+              <div id="submitFeedback" class="submit-feedback"></div>
+              <div style="font-size: 11px; margin-top: 6px; color: #cbd5e1; text-align: left;">
+                💡 <em><button type="button" id="linkLoginFromGameOver" class="btn-text-action" style="font-size: 11px;">Masuk akun</button> agar skor otomatis terkirim tanpa perlu tulis nama lagi!</em>
+              </div>
+            </div>
           </div>
 
           <div class="modal-actions">
             <button id="playAgainBtn" class="btn-primary">Main Lagi</button>
+            <button id="gameOverShopBtn" class="btn-secondary" type="button">🛍️ Toko Kostum</button>
             <button id="viewLeaderboardBtn" class="btn-secondary" type="button">🏆 Leaderboard</button>
             <button id="changeDiffBtn" class="btn-secondary" type="button">Ganti Level</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shop Modal Overlay -->
+      <div id="shopModal" class="overlay">
+        <div class="card-modal shop-modal">
+          <div class="shop-header">
+            <div class="shop-title-area">
+              <h2>🛍️ Toko Kostum Ular</h2>
+              <p class="modal-subtitle" style="margin-bottom:0;">Gunakan koin hasil bermain untuk membeli kostum!</p>
+            </div>
+            <button id="closeShopBtn" class="btn-close-modal" type="button" title="Tutup">&times;</button>
+          </div>
+
+          <!-- Shop User & Balance Bar -->
+          <div class="shop-bar">
+            <div class="shop-user-info">
+              <span>Pemain: <strong id="shopUsernameText">Tamu</strong></span>
+              <button id="shopSwitchUserBtn" class="btn-text-action" type="button">Ganti Akun</button>
+            </div>
+            <div class="shop-coins-badge">
+              <svg class="coin-svg" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="10" fill="#f59e0b" stroke="#b45309" stroke-width="1.2"/><circle cx="12" cy="12" r="8" fill="#fbbf24"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="#fef08a" stroke-width="0.8" stroke-dasharray="2 1.5"/><polygon points="12,6.5 13.5,10.2 17.5,12 13.5,13.8 12,17.5 10.5,13.8 6.5,12 10.5,10.2" fill="#fef9c3"/><circle cx="12" cy="12" r="1.6" fill="#ffffff"/></svg>
+              <span>Saldo:</span>
+              <strong id="shopCoinsText">0</strong>
+            </div>
+          </div>
+
+          <!-- Live Preview Box -->
+          <div class="shop-preview-box">
+            <canvas id="shopPreviewCanvas" width="240" height="80"></canvas>
+            <div class="shop-preview-info">
+              <div id="previewSkinName" class="preview-name">Classic Krait</div>
+              <div id="previewSkinDesc" class="preview-desc">Ular hitam belang kuning krait legendaris.</div>
+            </div>
+          </div>
+
+          <!-- Shop Grid Container -->
+          <div class="shop-grid" id="shopGrid">
+            <!-- Dynamically populated via JavaScript -->
+          </div>
+
+          <div class="modal-actions" style="margin-top: 10px;">
+            <button id="closeShopBtn2" class="btn-primary" type="button">Tutup Toko</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Account Modal Overlay -->
+      <div id="userModal" class="overlay">
+        <div class="card-modal user-modal">
+          <div class="user-modal-header">
+            <h2>👤 Akun Pemain</h2>
+            <button id="closeUserBtn" class="btn-close-modal" type="button" title="Tutup">&times;</button>
+          </div>
+
+          <!-- Logged In View -->
+          <div id="userLoggedInView" style="display: none;">
+            <div class="user-profile-card">
+              <div class="user-avatar-circle" id="profileAvatar">🐍</div>
+              <h3 id="profileUsername" style="font-size: 20px; color: #ffd152; margin-bottom: 2px;">Pemain</h3>
+              <p class="user-status-pill">✓ Akun Terhubung</p>
+              
+              <div class="user-stats-grid">
+                <div class="u-stat">
+                  <span class="u-lbl"><svg class="coin-svg" viewBox="0 0 24 24" width="15" height="15" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10" fill="#f59e0b" stroke="#b45309" stroke-width="1.2"/><circle cx="12" cy="12" r="8" fill="#fbbf24"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="#fef08a" stroke-width="0.8" stroke-dasharray="2 1.5"/><polygon points="12,6.5 13.5,10.2 17.5,12 13.5,13.8 12,17.5 10.5,13.8 6.5,12 10.5,10.2" fill="#fef9c3"/><circle cx="12" cy="12" r="1.6" fill="#ffffff"/></svg>Saldo Koin</span>
+                  <span class="u-val" id="profileCoins">0</span>
+                </div>
+                <div class="u-stat">
+                  <span class="u-lbl">🎨 Kostum Dipakai</span>
+                  <span class="u-val" id="profileSkin">Classic Krait</span>
+                </div>
+                <div class="u-stat">
+                  <span class="u-lbl">🛍️ Kostum Dimiliki</span>
+                  <span class="u-val" id="profileUnlockedCount">1 / 8</span>
+                </div>
+              </div>
+
+              <div class="modal-actions" style="margin-top: 16px;">
+                <button id="userOpenShopBtn" class="btn-secondary" type="button">🛍️ Buka Toko</button>
+                <button id="logoutBtn" class="btn-danger" type="button">Keluar (Logout)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Login & Register Tabs View -->
+          <div id="userAuthView">
+            <div class="auth-tabs">
+              <button id="tabLogin" class="auth-tab active" type="button">Masuk</button>
+              <button id="tabRegister" class="auth-tab" type="button">Daftar Baru</button>
+            </div>
+
+            <p id="authSubtitle" class="modal-subtitle">Masuk untuk memuat koin dan kostummu:</p>
+
+            <form id="authForm" onsubmit="return false;">
+              <div class="form-group">
+                <label for="authUsername">Username</label>
+                <input type="text" id="authUsername" placeholder="Contoh: snake_hero" maxlength="25" autocomplete="username" spellcheck="false" required />
+              </div>
+
+              <div class="form-group">
+                <label for="authPassword">Password</label>
+                <input type="password" id="authPassword" placeholder="Minimal 4 karakter" autocomplete="current-password" required />
+              </div>
+
+              <div id="authFeedback" class="submit-feedback" style="margin-bottom: 8px;"></div>
+
+              <button id="authSubmitBtn" class="btn-primary btn-block" type="submit">Masuk Sekarang</button>
+            </form>
+
+            <div class="auth-footer-tip">
+              🎁 <em>Pemain baru otomatis dapat bonus <b>5 koin</b> saat mendaftar!</em>
+            </div>
           </div>
         </div>
       </div>
@@ -872,10 +1561,18 @@
 
   <!-- Mobile On-Screen D-Pad -->
   <div class="mobile-controls">
-    <button class="touch-btn" id="btnUp">▲</button>
-    <button class="touch-btn" id="btnLeft">◀</button>
-    <button class="touch-btn" id="btnDown">▼</button>
-    <button class="touch-btn" id="btnRight">▶</button>
+    <button class="touch-btn" id="btnUp" aria-label="Atas">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 4l-7 7h4v9h6v-9h4z"/></svg>
+    </button>
+    <button class="touch-btn" id="btnLeft" aria-label="Kiri">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M4 12l7-7v4h9v6h-9v4z"/></svg>
+    </button>
+    <button class="touch-btn" id="btnDown" aria-label="Bawah">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 20l7-7h-4V4h-6v9H5z"/></svg>
+    </button>
+    <button class="touch-btn" id="btnRight" aria-label="Kanan">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20 12l-7 7v-4H4v-6h9V5z"/></svg>
+    </button>
   </div>
 
   <div class="instructions">
@@ -994,9 +1691,230 @@
         osc.start(now);
         osc.stop(now + 0.03);
       }
+
+      playCoinSound() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987.77, now); // B5
+        osc.frequency.setValueAtTime(1318.51, now + 0.06); // E6
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+
+      playBuySound() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const t = now + idx * 0.07;
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.18, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.2);
+        });
+      }
     }
 
     const sound = new SoundController();
+
+    // Snake Skin Costumes Catalog
+    const SKINS = {
+      classic: {
+        id: 'classic',
+        name: 'Classic Krait',
+        tag: 'Google Original',
+        price: 0,
+        icon: '🐍',
+        bodyColor: '#18181b',
+        stripeColor: '#facc15',
+        stripeInnerColor: '#fef08a',
+        scaleColor: '#facc15',
+        headMarkColor: '#facc15',
+        eyeCrossColor: '#facc15',
+        tongueColor: '#ef4444',
+        pupilColor: '#09090b',
+        desc: 'Ular hitam belang kuning krait legendaris.'
+      },
+      emerald: {
+        id: 'emerald',
+        name: 'Emerald Viper',
+        tag: 'Hutan Tropis',
+        price: 15,
+        icon: '🌿',
+        bodyColor: '#065f46',
+        stripeColor: '#34d399',
+        stripeInnerColor: '#a7f3d0',
+        scaleColor: '#6ee7b7',
+        headMarkColor: '#34d399',
+        eyeCrossColor: '#34d399',
+        tongueColor: '#fb7185',
+        pupilColor: '#022c22',
+        desc: 'Sisik zamrud hijau cerah yang memukau.'
+      },
+      ruby: {
+        id: 'ruby',
+        name: 'Ruby Dragon',
+        tag: 'Naga Api',
+        price: 35,
+        icon: '🔥',
+        bodyColor: '#881337',
+        stripeColor: '#f97316',
+        stripeInnerColor: '#fed7aa',
+        scaleColor: '#fbbf24',
+        headMarkColor: '#fbbf24',
+        eyeCrossColor: '#f97316',
+        tongueColor: '#fde047',
+        pupilColor: '#4c0519',
+        desc: 'Merah membara dengan sisik berapi emas.'
+      },
+      cyber: {
+        id: 'cyber',
+        name: 'Cyber Synth',
+        tag: 'Masa Depan',
+        price: 60,
+        icon: '⚡',
+        bodyColor: '#0f172a',
+        stripeColor: '#06b6d4',
+        stripeInnerColor: '#a5f3fc',
+        scaleColor: '#ec4899',
+        headMarkColor: '#06b6d4',
+        eyeCrossColor: '#06b6d4',
+        tongueColor: '#f43f5e',
+        pupilColor: '#020617',
+        desc: 'Neon cyan & magenta bergaya cyberpunk synthwave.'
+      },
+      amethyst: {
+        id: 'amethyst',
+        name: 'Amethyst Shadow',
+        tag: 'Mistik Gaib',
+        price: 80,
+        icon: '🔮',
+        bodyColor: '#3b0764',
+        stripeColor: '#a855f7',
+        stripeInnerColor: '#f3e8ff',
+        scaleColor: '#c084fc',
+        headMarkColor: '#d8b4fe',
+        eyeCrossColor: '#c084fc',
+        tongueColor: '#f43f5e',
+        pupilColor: '#1e0538',
+        desc: 'Ungu gelap dengan aura kristal mistis.'
+      },
+      albino: {
+        id: 'albino',
+        name: 'Pearl Albino',
+        tag: 'Mutiara Suci',
+        price: 100,
+        icon: '✨',
+        bodyColor: '#f1f5f9',
+        stripeColor: '#f472b6',
+        stripeInnerColor: '#fce7f3',
+        scaleColor: '#fb7185',
+        headMarkColor: '#fb7185',
+        eyeCrossColor: '#fb7185',
+        tongueColor: '#e11d48',
+        pupilColor: '#be123c',
+        desc: 'Putih mutiara elegan dengan aksen mawar & mata ruby.'
+      },
+      golden: {
+        id: 'golden',
+        name: 'Golden Emperor',
+        tag: 'Kerajaan Emas',
+        price: 120,
+        icon: '👑',
+        bodyColor: '#b45309',
+        stripeColor: '#fde047',
+        stripeInnerColor: '#fef9c3',
+        scaleColor: '#ffffff',
+        headMarkColor: '#fef08a',
+        eyeCrossColor: '#fde047',
+        tongueColor: '#ef4444',
+        pupilColor: '#451a03',
+        desc: 'Emas murni bangsawan dengan sisik berkilau putih.'
+      },
+      rainbow: {
+        id: 'rainbow',
+        name: 'Prismatic Rainbow',
+        tag: 'Spektrum Warna',
+        price: 150,
+        icon: '🌈',
+        bodyColor: 'rainbow',
+        stripeColor: '#ffffff',
+        stripeInnerColor: '#ffffff',
+        scaleColor: '#ffffff',
+        headMarkColor: '#ffffff',
+        eyeCrossColor: '#ffffff',
+        tongueColor: '#ffffff',
+        pupilColor: '#000000',
+        desc: 'Warna pelangi bergerak melintasi tubuh ular secara dinamis!'
+      }
+    };
+
+    // Reusable inline SVG coin string
+    const COIN_SVG_SMALL = `<svg class="coin-svg" viewBox="0 0 24 24" width="15" height="15" style="vertical-align: -2px; margin-right: 2px;"><circle cx="12" cy="12" r="10" fill="#f59e0b" stroke="#b45309" stroke-width="1.2"/><circle cx="12" cy="12" r="8" fill="#fbbf24"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="#fef08a" stroke-width="0.8" stroke-dasharray="2 1.5"/><polygon points="12,6.5 13.5,10.2 17.5,12 13.5,13.8 12,17.5 10.5,13.8 6.5,12 10.5,10.2" fill="#fef9c3"/><circle cx="12" cy="12" r="1.6" fill="#ffffff"/></svg>`;
+
+    // User, Coins & Skin State Helpers
+    function getActiveSkinId() {
+      const user = (typeof window.getCurrentSnakeUser === 'function') ? window.getCurrentSnakeUser() : null;
+      if (user && user.active_skin && SKINS[user.active_skin]) {
+        return user.active_skin;
+      }
+      const guestSkin = localStorage.getItem('snake_guest_active_skin');
+      if (guestSkin && SKINS[guestSkin]) {
+        return guestSkin;
+      }
+      return 'classic';
+    }
+
+    function getUserCoins() {
+      const user = (typeof window.getCurrentSnakeUser === 'function') ? window.getCurrentSnakeUser() : null;
+      if (user) {
+        return typeof user.coins === 'number' ? user.coins : 0;
+      }
+      return parseInt(localStorage.getItem('snake_guest_coins') || '0', 10);
+    }
+
+    function getUnlockedSkins() {
+      const user = (typeof window.getCurrentSnakeUser === 'function') ? window.getCurrentSnakeUser() : null;
+      if (user && Array.isArray(user.unlocked_skins)) {
+        return user.unlocked_skins;
+      }
+      let guestUnlocked = ['classic'];
+      try {
+        const saved = localStorage.getItem('snake_guest_unlocked_skins');
+        if (saved) guestUnlocked = JSON.parse(saved);
+      } catch(e) {}
+      if (!guestUnlocked.includes('classic')) guestUnlocked.unshift('classic');
+      return guestUnlocked;
+    }
+
+    function saveSessionCoins(earned) {
+      if (earned <= 0) return;
+      const user = (typeof window.getCurrentSnakeUser === 'function') ? window.getCurrentSnakeUser() : null;
+      if (user && user.username) {
+        window.addSnakeCoins(user.username, earned);
+      } else {
+        const currentGuest = parseInt(localStorage.getItem('snake_guest_coins') || '0', 10);
+        const newTotal = currentGuest + earned;
+        localStorage.setItem('snake_guest_coins', newTotal);
+      }
+      updateUserAndCoinsUI();
+    }
 
     // Game Configuration
     const COLS = 17;
@@ -1010,9 +1928,6 @@
     const COLOR_BOARD_LIGHT = '#aad751';
     const COLOR_BOARD_DARK = '#a2d149';
 
-    // Snake colors
-    const COLOR_SNAKE = '#18181b'; // Hitam-Kuning (Black & Yellow Snake)
-
     // Canvas setup
     const canvas = document.getElementById('gameCanvas');
     canvas.width = CANVAS_WIDTH;
@@ -1022,16 +1937,24 @@
     // UI Elements
     const scoreText = document.getElementById('scoreText');
     const highScoreText = document.getElementById('highScoreText');
+    const headerCoinCount = document.getElementById('headerCoinCount');
+    const shopToggle = document.getElementById('shopToggle');
+    const userProfileToggle = document.getElementById('userProfileToggle');
+    const headerUserBadge = document.getElementById('headerUserBadge');
     const gameOverModal = document.getElementById('gameOverModal');
     const pauseModal = document.getElementById('pauseModal');
     const startModal = document.getElementById('startModal');
     const startGameBtn = document.getElementById('startGameBtn');
+    const startShopBtn = document.getElementById('startShopBtn');
+    const startUserBtn = document.getElementById('startUserBtn');
+    const gameOverShopBtn = document.getElementById('gameOverShopBtn');
     const changeDiffBtn = document.getElementById('changeDiffBtn');
     const headerDiffBtn = document.getElementById('headerDiffBtn');
     const headerDiffIcon = document.getElementById('headerDiffIcon');
     const headerDiffName = document.getElementById('headerDiffName');
     const diffCards = document.querySelectorAll('.diff-card');
     const finalScore = document.getElementById('finalScore');
+    const finalCoins = document.getElementById('finalCoins');
     const bestScore = document.getElementById('bestScore');
     const countApple = document.getElementById('countApple');
     const countPineapple = document.getElementById('countPineapple');
@@ -1044,6 +1967,44 @@
     const soundIconOn = document.getElementById('soundIconOn');
     const soundIconOff = document.getElementById('soundIconOff');
 
+    // Shop UI Elements
+    const shopModal = document.getElementById('shopModal');
+    const closeShopBtn = document.getElementById('closeShopBtn');
+    const closeShopBtn2 = document.getElementById('closeShopBtn2');
+    const shopUsernameText = document.getElementById('shopUsernameText');
+    const shopCoinsText = document.getElementById('shopCoinsText');
+    const shopSwitchUserBtn = document.getElementById('shopSwitchUserBtn');
+    const shopGrid = document.getElementById('shopGrid');
+    const shopPreviewCanvas = document.getElementById('shopPreviewCanvas');
+    const previewSkinName = document.getElementById('previewSkinName');
+    const previewSkinDesc = document.getElementById('previewSkinDesc');
+
+    // User Account UI Elements
+    const userModal = document.getElementById('userModal');
+    const closeUserBtn = document.getElementById('closeUserBtn');
+    const userLoggedInView = document.getElementById('userLoggedInView');
+    const userAuthView = document.getElementById('userAuthView');
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
+    const authSubtitle = document.getElementById('authSubtitle');
+    const authForm = document.getElementById('authForm');
+    const authUsername = document.getElementById('authUsername');
+    const authPassword = document.getElementById('authPassword');
+    const authFeedback = document.getElementById('authFeedback');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileUsername = document.getElementById('profileUsername');
+    const profileCoins = document.getElementById('profileCoins');
+    const profileSkin = document.getElementById('profileSkin');
+    const profileUnlockedCount = document.getElementById('profileUnlockedCount');
+    const userOpenShopBtn = document.getElementById('userOpenShopBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    let currentAuthMode = 'login'; // 'login' or 'register'
+    let selectedPreviewSkinId = getActiveSkinId();
+    let shopPreviewAnimId = null;
+    let coinsEarnedThisRun = 0;
+
     // Supabase Leaderboard UI Elements
     const leaderboardToggle = document.getElementById('leaderboardToggle');
     const viewLeaderboardBtn = document.getElementById('viewLeaderboardBtn');
@@ -1055,6 +2016,11 @@
     const submitScoreBtn = document.getElementById('submitScoreBtn');
     const submitFeedback = document.getElementById('submitFeedback');
     const submitDiffTag = document.getElementById('submitDiffTag');
+    const autoSubmitArea = document.getElementById('autoSubmitArea');
+    const autoSubmitUsername = document.getElementById('autoSubmitUsername');
+    const autoSubmitFeedback = document.getElementById('autoSubmitFeedback');
+    const manualSubmitArea = document.getElementById('manualSubmitArea');
+    const linkLoginFromGameOver = document.getElementById('linkLoginFromGameOver');
     const lbTabs = document.querySelectorAll('.lb-tab');
 
     let currentLbFilter = 'all';
@@ -1658,6 +2624,37 @@
       }
     }
 
+    async function autoSubmitLoggedInScore(username) {
+      if (hasSubmittedThisGame) return;
+      if (!autoSubmitFeedback) return;
+
+      if (score <= 0) {
+        autoSubmitFeedback.innerHTML = '<span style="color: #94a3b8; font-size: 12px;">Skor 0 tidak dikirim ke leaderboard.</span>';
+        return;
+      }
+
+      if (typeof window.submitGlobalScore !== 'function' || !window.isSupabaseReady()) {
+        autoSubmitFeedback.innerHTML = '<span style="color: #cbd5e1; font-size: 12px;">Mode offline — skor tidak dikirim ke server.</span>';
+        return;
+      }
+
+      try {
+        autoSubmitFeedback.innerHTML = '<span class="feedback-loading" style="color: #93c5fd; font-size: 12px;">⏳ Mengirim skor otomatis ke leaderboard...</span>';
+        const res = await window.submitGlobalScore(username, score, currentDifficulty);
+        hasSubmittedThisGame = true;
+        if (res && res.action === 'ignored') {
+          autoSubmitFeedback.innerHTML = `<span class="feedback-success" style="color: #86efac; font-size: 12px;">✓ Rekor terbaikmu (${res.current_score}) tetap aman di leaderboard!</span>`;
+        } else if (res && res.action === 'updated') {
+          autoSubmitFeedback.innerHTML = `<span class="feedback-success" style="color: #86efac; font-size: 12px;">🎉 Rekor baru kamu: ${res.current_score}! Terkirim otomatis.</span>`;
+        } else {
+          autoSubmitFeedback.innerHTML = '<span class="feedback-success" style="color: #86efac; font-size: 12px;">✓ Skor berhasil otomatis tercatat di leaderboard global!</span>';
+        }
+      } catch (err) {
+        console.warn('Gagal kirim otomatis:', err);
+        autoSubmitFeedback.innerHTML = `<span class="feedback-error" style="color: #fca5a5; font-size: 12px;">Pengiriman otomatis gagal (${err.message || 'Offline'}).</span>`;
+      }
+    }
+
     async function loadLeaderboardData(filterDiff = 'all') {
       if (!leaderboardContent) return;
       leaderboardContent.innerHTML = '<div class="lb-status-msg">Memuat data peringkat... ⏳</div>';
@@ -1806,6 +2803,481 @@
         loadLeaderboardData(currentLbFilter);
       });
     });
+
+    // ==========================================
+    // SHOP & USER AUTHENTICATION SYSTEM
+    // ==========================================
+
+    function updateUserAndCoinsUI() {
+      const user = (typeof window.getCurrentSnakeUser === 'function') ? window.getCurrentSnakeUser() : null;
+      const coins = getUserCoins();
+      const activeSkinId = getActiveSkinId();
+      const unlocked = getUnlockedSkins();
+
+      // Header UI
+      if (headerCoinCount) headerCoinCount.innerText = coins;
+      if (headerUserBadge) {
+        headerUserBadge.innerText = user ? user.username : 'Masuk';
+      }
+
+      // Shop UI
+      if (shopCoinsText) shopCoinsText.innerText = coins;
+      if (shopUsernameText) {
+        shopUsernameText.innerText = user ? user.username : 'Tamu (Lokal)';
+      }
+
+      // User Profile Modal UI
+      if (user) {
+        if (userLoggedInView) userLoggedInView.style.display = 'block';
+        if (userAuthView) userAuthView.style.display = 'none';
+        if (profileUsername) profileUsername.innerText = user.username;
+        if (profileCoins) profileCoins.innerText = coins;
+        if (profileSkin) profileSkin.innerText = SKINS[activeSkinId] ? SKINS[activeSkinId].name : activeSkinId;
+        if (profileUnlockedCount) profileUnlockedCount.innerText = `${unlocked.length} / ${Object.keys(SKINS).length}`;
+        if (playerNameInput) playerNameInput.value = user.username;
+      } else {
+        if (userLoggedInView) userLoggedInView.style.display = 'none';
+        if (userAuthView) userAuthView.style.display = 'block';
+      }
+
+      // Sinkronisasi status Game Over modal jika sedang terbuka
+      if (gameOverModal && gameOverModal.classList.contains('active')) {
+        if (user && user.username) {
+          if (autoSubmitArea) autoSubmitArea.style.display = 'block';
+          if (manualSubmitArea) manualSubmitArea.style.display = 'none';
+          if (autoSubmitUsername) autoSubmitUsername.innerText = user.username;
+          if (!hasSubmittedThisGame && score > 0) {
+            autoSubmitLoggedInScore(user.username);
+          }
+        } else {
+          if (autoSubmitArea) autoSubmitArea.style.display = 'none';
+          if (manualSubmitArea) manualSubmitArea.style.display = 'block';
+        }
+      }
+    }
+
+    // Shop Preview Animation Loop on Mini Canvas
+    function drawShopPreview(timestamp) {
+      if (!shopPreviewCanvas) return;
+      const pCtx = shopPreviewCanvas.getContext('2d');
+      const w = shopPreviewCanvas.width;
+      const h = shopPreviewCanvas.height;
+      pCtx.clearRect(0, 0, w, h);
+
+      // Background subtle grid
+      pCtx.fillStyle = '#1e1e24';
+      pCtx.fillRect(0, 0, w, h);
+
+      const skinId = selectedPreviewSkinId || getActiveSkinId();
+      const skinDef = SKINS[skinId] || SKINS.classic;
+      const isRainbow = (skinId === 'rainbow');
+      const t = (timestamp || performance.now()) * 0.003;
+
+      const bodyCol = isRainbow ? `hsl(${(t * 40) % 360}, 85%, 50%)` : skinDef.bodyColor;
+      const stripeCol = isRainbow ? `hsl(${(t * 40 + 180) % 360}, 95%, 65%)` : skinDef.stripeColor;
+      const stripeInnerCol = isRainbow ? '#ffffff' : skinDef.stripeInnerColor;
+      const scaleCol = isRainbow ? `hsl(${(t * 40 + 90) % 360}, 90%, 70%)` : skinDef.scaleColor;
+      const headMarkCol = isRainbow ? '#ffffff' : skinDef.headMarkColor;
+      const eyeCrossCol = isRainbow ? '#ffffff' : skinDef.eyeCrossColor;
+
+      // Draw slithering snake in preview
+      const segCount = 14;
+      const pts = [];
+      const baseR = 12;
+
+      for (let i = 0; i < segCount; i++) {
+        const u = i / (segCount - 1);
+        const x = 30 + (w - 60) * (1 - u);
+        const y = (h / 2) + Math.sin(t * 3 - i * 0.45) * 16;
+        pts.push({ x, y });
+      }
+
+      // 1. Body stroke
+      pCtx.save();
+      pCtx.lineCap = 'round';
+      pCtx.lineJoin = 'round';
+      pCtx.lineWidth = baseR * 1.8;
+      pCtx.strokeStyle = bodyCol;
+      pCtx.beginPath();
+      pCtx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        pCtx.lineTo(pts[i].x, pts[i].y);
+      }
+      pCtx.stroke();
+      pCtx.restore();
+
+      // 2. Stripes and scales
+      for (let i = 1; i < pts.length - 1; i++) {
+        const pt = pts[i];
+        const next = pts[i + 1];
+        const dx = pt.x - next.x;
+        const dy = pt.y - next.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const perpX = -dy / len;
+        const perpY = dx / len;
+
+        if (i % 2 === 1) {
+          pCtx.save();
+          pCtx.strokeStyle = stripeCol;
+          pCtx.lineWidth = 7;
+          pCtx.lineCap = 'round';
+          pCtx.beginPath();
+          pCtx.moveTo(pt.x - perpX * 9, pt.y - perpY * 9);
+          pCtx.lineTo(pt.x + perpX * 9, pt.y + perpY * 9);
+          pCtx.stroke();
+
+          pCtx.strokeStyle = stripeInnerCol;
+          pCtx.lineWidth = 2.5;
+          pCtx.beginPath();
+          pCtx.moveTo(pt.x - perpX * 5, pt.y - perpY * 5);
+          pCtx.lineTo(pt.x + perpX * 5, pt.y + perpY * 5);
+          pCtx.stroke();
+          pCtx.restore();
+        } else {
+          pCtx.save();
+          pCtx.fillStyle = scaleCol;
+          pCtx.beginPath();
+          pCtx.arc(pt.x, pt.y, 2.8, 0, Math.PI * 2);
+          pCtx.fill();
+          pCtx.restore();
+        }
+      }
+
+      // 3. Head & Eyes
+      const head = pts[0];
+      const neck = pts[1];
+      const hAngle = Math.atan2(head.y - neck.y, head.x - neck.x);
+
+      // Head circle
+      pCtx.fillStyle = bodyCol;
+      pCtx.beginPath();
+      pCtx.arc(head.x, head.y, baseR * 1.0, 0, Math.PI * 2);
+      pCtx.fill();
+
+      // Crown Chevron
+      pCtx.save();
+      pCtx.translate(head.x, head.y);
+      pCtx.rotate(hAngle);
+      pCtx.fillStyle = headMarkCol;
+      pCtx.beginPath();
+      pCtx.moveTo(5, 0);
+      pCtx.lineTo(-4, -4);
+      pCtx.lineTo(-1, 0);
+      pCtx.lineTo(-4, 4);
+      pCtx.closePath();
+      pCtx.fill();
+
+      // Eyes
+      const eyeR = 3.5;
+      const eyeOff = 5.5;
+      const eyeX = 3;
+      // White eye
+      pCtx.fillStyle = '#ffffff';
+      pCtx.beginPath();
+      pCtx.arc(eyeX, -eyeOff, eyeR, 0, Math.PI * 2);
+      pCtx.arc(eyeX, eyeOff, eyeR, 0, Math.PI * 2);
+      pCtx.fill();
+
+      // Pupil
+      pCtx.fillStyle = skinDef.pupilColor || '#000000';
+      pCtx.beginPath();
+      pCtx.arc(eyeX + 1.2, -eyeOff, 1.8, 0, Math.PI * 2);
+      pCtx.arc(eyeX + 1.2, eyeOff, 1.8, 0, Math.PI * 2);
+      pCtx.fill();
+      pCtx.restore();
+
+      if (shopModal && shopModal.classList.contains('active')) {
+        shopPreviewAnimId = requestAnimationFrame(drawShopPreview);
+      }
+    }
+
+    function renderShopGrid() {
+      if (!shopGrid) return;
+      const activeSkinId = getActiveSkinId();
+      const unlocked = getUnlockedSkins();
+      const coins = getUserCoins();
+
+      let html = '';
+      Object.keys(SKINS).forEach(sId => {
+        const s = SKINS[sId];
+        const isOwned = unlocked.includes(sId) || s.price === 0;
+        const isActive = (activeSkinId === sId);
+        const isSelected = (selectedPreviewSkinId === sId);
+
+        let cardClass = 'skin-card';
+        if (isSelected) cardClass += ' selected';
+        if (isActive) cardClass += ' active-skin';
+
+        let btnHtml = '';
+        if (isActive) {
+          btnHtml = `<button class="btn-skin-action btn-skin-equipped" disabled type="button">✓ Dipakai</button>`;
+        } else if (isOwned) {
+          btnHtml = `<button class="btn-skin-action btn-skin-equip" onclick="window.handleSkinAction('${sId}', event)" type="button">Gunakan</button>`;
+        } else {
+          const canAfford = coins >= s.price;
+          btnHtml = `<button class="btn-skin-action btn-skin-buy" ${canAfford ? '' : 'disabled'} onclick="window.handleSkinAction('${sId}', event)" type="button">Beli ${COIN_SVG_SMALL} ${s.price}</button>`;
+        }
+
+        html += `
+          <div class="${cardClass}" data-skin="${sId}" onclick="window.selectShopSkin('${sId}')">
+            <div class="skin-card-icon">${s.icon}</div>
+            <div class="skin-card-name" title="${s.name}">${s.name}</div>
+            <div class="skin-card-tag">${s.tag}</div>
+            ${btnHtml}
+          </div>
+        `;
+      });
+
+      shopGrid.innerHTML = html;
+
+      // Update preview labels
+      const curSkin = SKINS[selectedPreviewSkinId] || SKINS.classic;
+      if (previewSkinName) previewSkinName.innerText = `${curSkin.icon} ${curSkin.name}`;
+      if (previewSkinDesc) previewSkinDesc.innerText = curSkin.desc;
+    }
+
+    window.selectShopSkin = function (skinId) {
+      if (!SKINS[skinId]) return;
+      selectedPreviewSkinId = skinId;
+      renderShopGrid();
+    };
+
+    window.handleSkinAction = async function (skinId, e) {
+      if (e) e.stopPropagation();
+      const skin = SKINS[skinId];
+      if (!skin) return;
+
+      const activeSkinId = getActiveSkinId();
+      if (activeSkinId === skinId) return;
+
+      const unlocked = getUnlockedSkins();
+      const isOwned = unlocked.includes(skinId) || skin.price === 0;
+
+      if (isOwned) {
+        // Equip skin
+        if (typeof window.equipSnakeSkin === 'function') {
+          const res = await window.equipSnakeSkin(skinId);
+          if (res && res.success) {
+            sound.playCoinSound();
+            selectedPreviewSkinId = skinId;
+            updateUserAndCoinsUI();
+            renderShopGrid();
+          }
+        }
+      } else {
+        // Buy skin
+        const coins = getUserCoins();
+        if (coins < skin.price) {
+          alert(`Koin tidak cukup! Kamu membutuhkan ${skin.price} koin, saldo kamu: ${coins} koin.`);
+          return;
+        }
+
+        const user = (typeof window.getCurrentSnakeUser === 'function') ? window.getCurrentSnakeUser() : null;
+        if (!user) {
+          // Guest buying: save guest skin
+          const newCoins = coins - skin.price;
+          localStorage.setItem('snake_guest_coins', newCoins);
+          unlocked.push(skinId);
+          localStorage.setItem('snake_guest_unlocked_skins', JSON.stringify(unlocked));
+          localStorage.setItem('snake_guest_active_skin', skinId);
+          sound.playBuySound();
+          selectedPreviewSkinId = skinId;
+          updateUserAndCoinsUI();
+          renderShopGrid();
+          return;
+        }
+
+        if (typeof window.buySnakeSkin === 'function') {
+          const res = await window.buySnakeSkin(skinId, skin.price);
+          if (res && res.success) {
+            sound.playBuySound();
+            selectedPreviewSkinId = skinId;
+            updateUserAndCoinsUI();
+            renderShopGrid();
+          } else {
+            alert(res.message || 'Gagal membeli kostum.');
+          }
+        }
+      }
+    };
+
+    function openShop() {
+      if (isGameStarted && !isPaused && !isGameOver) {
+        togglePause();
+      }
+      selectedPreviewSkinId = getActiveSkinId();
+      updateUserAndCoinsUI();
+      renderShopGrid();
+
+      if (shopModal) shopModal.classList.add('active');
+      if (shopPreviewAnimId) cancelAnimationFrame(shopPreviewAnimId);
+      shopPreviewAnimId = requestAnimationFrame(drawShopPreview);
+    }
+
+    function closeShop() {
+      if (shopModal) shopModal.classList.remove('active');
+      if (shopPreviewAnimId) {
+        cancelAnimationFrame(shopPreviewAnimId);
+        shopPreviewAnimId = null;
+      }
+    }
+
+    function openUserModal() {
+      if (isGameStarted && !isPaused && !isGameOver) {
+        togglePause();
+      }
+      updateUserAndCoinsUI();
+      if (authFeedback) authFeedback.innerHTML = '';
+      if (userModal) userModal.classList.add('active');
+    }
+
+    function closeUserModal() {
+      if (userModal) userModal.classList.remove('active');
+    }
+
+    // Handle Authentication Submission
+    async function handleAuthSubmit() {
+      const u = (authUsername ? authUsername.value : '').trim();
+      const p = (authPassword ? authPassword.value : '').trim();
+
+      if (!u || u.length < 3) {
+        if (authFeedback) authFeedback.innerHTML = '<span class="feedback-error">Username minimal 3 karakter!</span>';
+        return;
+      }
+      if (!p || p.length < 4) {
+        if (authFeedback) authFeedback.innerHTML = '<span class="feedback-error">Password minimal 4 karakter!</span>';
+        return;
+      }
+
+      if (authSubmitBtn) {
+        authSubmitBtn.disabled = true;
+        authSubmitBtn.innerText = 'Memproses...';
+      }
+      if (authFeedback) {
+        authFeedback.innerHTML = '<span class="feedback-loading">Menghubungkan ke akun...</span>';
+      }
+
+      try {
+        let res = null;
+        if (currentAuthMode === 'register') {
+          res = await window.registerSnakeUser(u, p);
+          // Transfer guest coins/skin if present
+          if (res && res.success && res.user) {
+            const guestCoins = parseInt(localStorage.getItem('snake_guest_coins') || '0', 10);
+            if (guestCoins > 0) {
+              await window.addSnakeCoins(res.user.username, guestCoins);
+              localStorage.removeItem('snake_guest_coins');
+            }
+            const guestSkin = localStorage.getItem('snake_guest_active_skin');
+            if (guestSkin && guestSkin !== 'classic') {
+              await window.equipSnakeSkin(guestSkin);
+            }
+          }
+        } else {
+          res = await window.loginSnakeUser(u, p);
+        }
+
+        if (res && res.success) {
+          sound.playCoinSound();
+          if (authFeedback) {
+            authFeedback.innerHTML = `<span class="feedback-success">${res.message || 'Sukses!'}</span>`;
+          }
+          setTimeout(() => {
+            updateUserAndCoinsUI();
+            if (authUsername) authUsername.value = '';
+            if (authPassword) authPassword.value = '';
+            if (authFeedback) authFeedback.innerHTML = '';
+            if (authSubmitBtn) {
+              authSubmitBtn.disabled = false;
+              authSubmitBtn.innerText = currentAuthMode === 'login' ? 'Masuk Sekarang' : 'Daftar Akun Baru';
+            }
+          }, 700);
+        } else {
+          if (authFeedback) {
+            authFeedback.innerHTML = `<span class="feedback-error">${(res && res.message) || 'Terjadi kesalahan.'}</span>`;
+          }
+          if (authSubmitBtn) {
+            authSubmitBtn.disabled = false;
+            authSubmitBtn.innerText = currentAuthMode === 'login' ? 'Masuk Sekarang' : 'Daftar Akun Baru';
+          }
+        }
+      } catch (err) {
+        console.error('Auth error:', err);
+        if (authFeedback) {
+          authFeedback.innerHTML = `<span class="feedback-error">${err.message || 'Gagal terhubung.'}</span>`;
+        }
+        if (authSubmitBtn) {
+          authSubmitBtn.disabled = false;
+          authSubmitBtn.innerText = currentAuthMode === 'login' ? 'Masuk Sekarang' : 'Daftar Akun Baru';
+        }
+      }
+    }
+
+    // Hook Auth Tabs & Listeners
+    if (tabLogin) {
+      tabLogin.addEventListener('click', () => {
+        currentAuthMode = 'login';
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        if (authSubtitle) authSubtitle.innerText = 'Masuk untuk memuat koin dan kostummu:';
+        if (authSubmitBtn) authSubmitBtn.innerText = 'Masuk Sekarang';
+        if (authFeedback) authFeedback.innerHTML = '';
+      });
+    }
+
+    if (tabRegister) {
+      tabRegister.addEventListener('click', () => {
+        currentAuthMode = 'register';
+        tabRegister.classList.add('active');
+        tabLogin.classList.remove('active');
+        if (authSubtitle) authSubtitle.innerText = 'Daftar akun baru (dapatkan bonus 5 koin):';
+        if (authSubmitBtn) authSubmitBtn.innerText = 'Daftar Akun Baru';
+        if (authFeedback) authFeedback.innerHTML = '';
+      });
+    }
+
+    if (authForm) {
+      authForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleAuthSubmit();
+      });
+    }
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        if (typeof window.logoutSnakeUser === 'function') {
+          window.logoutSnakeUser();
+        }
+        updateUserAndCoinsUI();
+      });
+    }
+
+    if (shopToggle) shopToggle.addEventListener('click', openShop);
+    if (startShopBtn) startShopBtn.addEventListener('click', openShop);
+    if (gameOverShopBtn) gameOverShopBtn.addEventListener('click', openShop);
+    if (userOpenShopBtn) {
+      userOpenShopBtn.addEventListener('click', () => {
+        closeUserModal();
+        openShop();
+      });
+    }
+    if (closeShopBtn) closeShopBtn.addEventListener('click', closeShop);
+    if (closeShopBtn2) closeShopBtn2.addEventListener('click', closeShop);
+
+    if (userProfileToggle) userProfileToggle.addEventListener('click', openUserModal);
+    if (startUserBtn) startUserBtn.addEventListener('click', openUserModal);
+    if (shopSwitchUserBtn) {
+      shopSwitchUserBtn.addEventListener('click', () => {
+        closeShop();
+        openUserModal();
+      });
+    }
+    if (closeUserBtn) closeUserBtn.addEventListener('click', closeUserModal);
+    if (linkLoginFromGameOver) {
+      linkLoginFromGameOver.addEventListener('click', () => {
+        openUserModal();
+      });
+    }
 
     // ==========================================
     // PARTIKEL & EFEK MAKAN BUAH
@@ -2037,6 +3509,7 @@
         prevTail = null; // Ekor diam saat tubuh memanjang
 
         score += eatenFruit.points;
+        coinsEarnedThisRun += eatenFruit.points;
         eatenCounts[eatenFruit.type]++;
         scoreText.innerText = score;
 
@@ -2048,13 +3521,22 @@
 
         sound.playEatSound(eatenFruit.type);
 
-        // Angka skor melayang
+        // Angka skor & koin melayang
         floatingTexts.push({
           text: `+${eatenFruit.points}`,
           x: (newHead.x + 0.5) * CELL_SIZE,
           y: (newHead.y + 0.5) * CELL_SIZE,
           alpha: 1.0,
-          vy: -1.2
+          vy: -1.2,
+          color: '#ffffff'
+        });
+        floatingTexts.push({
+          text: '+1 Koin',
+          x: (newHead.x + 0.5) * CELL_SIZE + 10,
+          y: (newHead.y + 0.5) * CELL_SIZE - 12,
+          alpha: 1.0,
+          vy: -1.5,
+          color: '#facc15'
         });
 
         // Partikel ledakan sari buah
@@ -2091,30 +3573,47 @@
       sound.playDieSound();
 
       finalScore.innerText = score;
+      if (finalCoins) finalCoins.innerHTML = `+${coinsEarnedThisRun} ${COIN_SVG_SMALL}`;
       bestScore.innerText = highScore;
       countApple.innerText = eatenCounts.apple;
       countPineapple.innerText = eatenCounts.pineapple;
       countGrape.innerText = eatenCounts.grape;
 
+      // Simpan perolehan koin ke akun atau guest
+      if (coinsEarnedThisRun > 0) {
+        saveSessionCoins(coinsEarnedThisRun);
+      }
+
       // Update skor terbaik pada badge
       const badge = document.getElementById(`diffScore_${currentDifficulty}`);
       if (badge) badge.innerText = `Best: ${highScore}`;
 
-      // Inisialisasi formulir pengiriman skor global
-      if (playerNameInput) {
-        playerNameInput.value = localStorage.getItem('snake_player_name') || '';
-      }
       if (submitDiffTag && DIFFICULTIES[currentDifficulty]) {
         submitDiffTag.innerText = `[${DIFFICULTIES[currentDifficulty].name}]`;
       }
-      if (submitFeedback) {
-        submitFeedback.innerHTML = '';
-      }
-      if (submitScoreBtn) {
-        submitScoreBtn.disabled = false;
-        submitScoreBtn.innerText = 'Kirim';
-      }
       hasSubmittedThisGame = false;
+
+      // Inisialisasi formulir pengiriman skor global (Otomatis jika akun login)
+      const activeUser = (typeof window.getCurrentSnakeUser === 'function') ? window.getCurrentSnakeUser() : null;
+      if (activeUser && activeUser.username) {
+        if (autoSubmitArea) autoSubmitArea.style.display = 'block';
+        if (manualSubmitArea) manualSubmitArea.style.display = 'none';
+        if (autoSubmitUsername) autoSubmitUsername.innerText = activeUser.username;
+        autoSubmitLoggedInScore(activeUser.username);
+      } else {
+        if (autoSubmitArea) autoSubmitArea.style.display = 'none';
+        if (manualSubmitArea) manualSubmitArea.style.display = 'block';
+        if (playerNameInput) {
+          playerNameInput.value = localStorage.getItem('snake_player_name') || '';
+        }
+        if (submitFeedback) {
+          submitFeedback.innerHTML = '';
+        }
+        if (submitScoreBtn) {
+          submitScoreBtn.disabled = false;
+          submitScoreBtn.innerText = 'Kirim';
+        }
+      }
 
       // Tampilkan modal setelah animasi tabrakan selesai
       setTimeout(() => {
@@ -2162,12 +3661,27 @@
 
       const totalLen = getPathLength(path);
 
+      // Active Skin Configuration
+      const activeSkinId = getActiveSkinId();
+      const skinDef = SKINS[activeSkinId] || SKINS.classic;
+      const isRainbow = (activeSkinId === 'rainbow');
+      const now = performance.now();
+
+      const bodyCol = isRainbow ? `hsl(${(now * 0.08) % 360}, 85%, 45%)` : skinDef.bodyColor;
+      const stripeCol = isRainbow ? `hsl(${(now * 0.08 + 180) % 360}, 95%, 65%)` : skinDef.stripeColor;
+      const stripeInnerCol = isRainbow ? '#ffffff' : skinDef.stripeInnerColor;
+      const scaleCol = isRainbow ? `hsl(${(now * 0.08 + 90) % 360}, 90%, 70%)` : skinDef.scaleColor;
+      const headMarkCol = isRainbow ? '#ffffff' : skinDef.headMarkColor;
+      const tongueCol = isRainbow ? `hsl(${(now * 0.08 + 270) % 360}, 90%, 65%)` : (skinDef.tongueColor || '#ef4444');
+      const eyeCrossCol = isRainbow ? '#ffffff' : (skinDef.eyeCrossColor || '#facc15');
+      const pupilCol = isRainbow ? '#000000' : (skinDef.pupilColor || '#09090b');
+
       // 1. Badan Ular Halus Berkelanjutan (Continuous rounded body)
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.lineWidth = CELL_SIZE * 0.82;
-      ctx.strokeStyle = COLOR_SNAKE;
+      ctx.strokeStyle = bodyCol;
 
       ctx.beginPath();
       ctx.moveTo(path[0].x, path[0].y);
@@ -2187,7 +3701,7 @@
 
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, CELL_SIZE * 0.44, 0, Math.PI * 2);
-            ctx.fillStyle = COLOR_SNAKE;
+            ctx.fillStyle = bodyCol;
             ctx.fill();
 
             ctx.beginPath();
@@ -2198,17 +3712,17 @@
         }
       });
 
-      // 3. Corak Badan Ular: Belang Hitam-Kuning & Sisik Berlian Mengalir Halus
+      // 3. Corak Badan Ular: Belang & Sisik Berlian Mengalir Halus
       const numPatterns = Math.floor((totalLen - CELL_SIZE * 0.35) / CELL_SIZE);
       for (let k = 1; k <= numPatterns; k++) {
         const dist = k * CELL_SIZE;
         const pt = getPointAndTangentAtDistance(path, dist);
         if (!pt) continue;
 
-        // Belang Melintang Kuning Cerah pada segmen ganjil (Banded Krait Style)
+        // Belang Melintang pada segmen ganjil
         if (k % 2 === 1) {
           ctx.save();
-          ctx.strokeStyle = '#facc15'; // Kuning menyala
+          ctx.strokeStyle = stripeCol;
           ctx.lineWidth = CELL_SIZE * 0.38;
           ctx.lineCap = 'round';
           ctx.beginPath();
@@ -2217,8 +3731,8 @@
           ctx.lineTo(pt.x + pt.perpX * halfW, pt.y + pt.perpY * halfW);
           ctx.stroke();
 
-          // Garis aksen kuning muda di tengah belang
-          ctx.strokeStyle = '#fef08a';
+          // Garis aksen di tengah belang
+          ctx.strokeStyle = stripeInnerCol;
           ctx.lineWidth = CELL_SIZE * 0.12;
           ctx.beginPath();
           const innerW = CELL_SIZE * 0.24;
@@ -2238,8 +3752,8 @@
         const dH = CELL_SIZE * 0.13;
 
         if (k % 2 === 0) {
-          // Sisik berlian kuning emas di atas segmen hitam
-          ctx.fillStyle = '#facc15';
+          // Sisik berlian di atas segmen utama
+          ctx.fillStyle = scaleCol;
           ctx.beginPath();
           ctx.moveTo(dW, 0);
           ctx.lineTo(0, dH);
@@ -2254,8 +3768,8 @@
           ctx.arc(0, 0, CELL_SIZE * 0.05, 0, Math.PI * 2);
           ctx.fill();
         } else {
-          // Sisik berlian hitam di atas belang kuning
-          ctx.fillStyle = '#18181b';
+          // Sisik berlian di atas belang
+          ctx.fillStyle = bodyCol;
           ctx.beginPath();
           ctx.moveTo(dW * 0.75, 0);
           ctx.lineTo(0, dH * 0.75);
@@ -2264,8 +3778,8 @@
           ctx.closePath();
           ctx.fill();
 
-          // Titik pusat kuning emas
-          ctx.fillStyle = '#facc15';
+          // Titik pusat
+          ctx.fillStyle = scaleCol;
           ctx.beginPath();
           ctx.arc(0, 0, CELL_SIZE * 0.04, 0, Math.PI * 2);
           ctx.fill();
@@ -2288,18 +3802,18 @@
         }
       }
 
-      // Lingkaran kepala bulat hitam
-      ctx.fillStyle = COLOR_SNAKE;
+      // Lingkaran kepala bulat
+      ctx.fillStyle = bodyCol;
       ctx.beginPath();
       ctx.arc(headCx, headCy, CELL_SIZE * 0.41, 0, Math.PI * 2);
       ctx.fill();
 
-      // Corak mahkota / v-chevron kuning di dahi kepala ular
+      // Corak mahkota / v-chevron di dahi kepala ular
       ctx.save();
       ctx.translate(headCx, headCy);
       const headAngle = Math.atan2(direction.y, direction.x);
       ctx.rotate(headAngle);
-      ctx.fillStyle = '#facc15';
+      ctx.fillStyle = headMarkCol;
       ctx.beginPath();
       ctx.moveTo(CELL_SIZE * 0.14, 0);
       ctx.lineTo(-CELL_SIZE * 0.12, -CELL_SIZE * 0.16);
@@ -2323,7 +3837,7 @@
         }
       }
 
-      // --- Lidah Merah Bercabang (Red Forked Tongue) ---
+      // --- Lidah Bercabang ---
       if (!isDying) {
         const isNearFruit = closestFruit && closestFruit.dist < CELL_SIZE * 2.2;
         const flickFreq = isNearFruit ? 0.02 : 0.012;
@@ -2346,7 +3860,7 @@
           const tipY = startY + direction.y * tongueLen;
 
           ctx.save();
-          ctx.strokeStyle = '#ef4444'; // Lidah merah
+          ctx.strokeStyle = tongueCol;
           ctx.lineWidth = 2.8;
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
@@ -2395,7 +3909,7 @@
       if (isDying) {
         // Mata silang pusing ("X" Dizzy Eyes saat kalah)
         ctx.save();
-        ctx.strokeStyle = '#facc15'; // Silang kuning terang
+        ctx.strokeStyle = eyeCrossCol;
         ctx.lineWidth = 2.5;
         ctx.lineCap = 'round';
         const dR = eyeRadius * 0.65;
@@ -2420,7 +3934,7 @@
           pupilShiftY = Math.sin(angle) * 3.0;
         }
 
-        ctx.fillStyle = '#09090b'; // Pupil hitam pekat
+        ctx.fillStyle = pupilCol;
         ctx.beginPath();
         ctx.arc(eye1.x + pupilShiftX, eye1.y + pupilShiftY, pupilRadius, 0, Math.PI * 2);
         ctx.arc(eye2.x + pupilShiftX, eye2.y + pupilShiftY, pupilRadius, 0, Math.PI * 2);
@@ -2449,9 +3963,10 @@
         }
 
         ctx.save();
-        ctx.font = 'bold 16px "Segoe UI", sans-serif';
-        ctx.fillStyle = `rgba(255, 255, 255, ${ft.alpha})`;
-        ctx.strokeStyle = `rgba(0, 0, 0, ${ft.alpha * 0.5})`;
+        ctx.globalAlpha = Math.max(0, ft.alpha);
+        ctx.font = 'bold 15px "Segoe UI", sans-serif';
+        ctx.fillStyle = ft.color || '#ffffff';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.lineWidth = 3;
         ctx.textAlign = 'center';
         ctx.strokeText(ft.text, ft.x, ft.y);
@@ -2495,6 +4010,7 @@
 
     // Initialize Game
     initIcons();
+    updateUserAndCoinsUI();
     resetGame();
     showStartModal();
     animationFrameId = requestAnimationFrame(gameLoop);
