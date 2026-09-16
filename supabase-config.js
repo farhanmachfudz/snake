@@ -24,7 +24,7 @@
     return !!initClient();
   };
 
-  // Submit high score to Supabase leaderboard
+  // Submit high score to Supabase leaderboard (retains only highest score per player and difficulty)
   window.submitGlobalScore = async function (playerName, score, difficulty) {
     const c = initClient();
     if (!c) {
@@ -42,23 +42,104 @@
       throw new Error('Skor tidak valid.');
     }
 
-    const { data, error } = await c
+    const finalDifficulty = difficulty || 'normal';
+    const finalScore = Math.floor(score);
+
+    // 1. Coba panggil fungsi RPC database record_high_score
+    try {
+      const { data: rpcData, error: rpcError } = await c.rpc('record_high_score', {
+        p_player_name: cleanName,
+        p_score: finalScore,
+        p_difficulty: finalDifficulty
+      });
+
+      if (!rpcError && rpcData) {
+        return rpcData;
+      }
+      if (rpcError) {
+        console.warn('RPC record_high_score gagal, beralih ke metode fallback:', rpcError);
+      }
+    } catch (rpcEx) {
+      console.warn('Error saat panggil RPC record_high_score:', rpcEx);
+    }
+
+    // 2. Fallback: query dan update/insert langsung ke tabel leaderboard
+    const { data: existing, error: fetchErr } = await c
+      .from('leaderboard')
+      .select('id, score')
+      .eq('player_name', cleanName)
+      .eq('difficulty', finalDifficulty)
+      .maybeSingle();
+
+    if (fetchErr) {
+      console.error('Error cek data leaderboard sebelumnya:', fetchErr);
+      throw fetchErr;
+    }
+
+    if (existing) {
+      if (finalScore > existing.score) {
+        const { data: updateData, error: updateErr } = await c
+          .from('leaderboard')
+          .update({
+            score: finalScore,
+            created_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+          .select();
+
+        if (updateErr) {
+          console.error('Error update rekor leaderboard:', updateErr);
+          throw updateErr;
+        }
+
+        return {
+          action: 'updated',
+          is_new_high: true,
+          previous_score: existing.score,
+          current_score: finalScore,
+          player_name: cleanName,
+          difficulty: finalDifficulty,
+          data: updateData
+        };
+      } else {
+        // Skor saat ini tidak melampaui rekor di database, simpan rekor lama
+        return {
+          action: 'ignored',
+          is_new_high: false,
+          previous_score: existing.score,
+          current_score: existing.score,
+          submitted_score: finalScore,
+          player_name: cleanName,
+          difficulty: finalDifficulty
+        };
+      }
+    }
+
+    // Jika belum ada catatan sebelumnya, masukkan catatan baru
+    const { data: insertData, error: insertErr } = await c
       .from('leaderboard')
       .insert([
         {
           player_name: cleanName,
-          score: Math.floor(score),
-          difficulty: difficulty || 'normal'
+          score: finalScore,
+          difficulty: finalDifficulty
         }
       ])
       .select();
 
-    if (error) {
-      console.error('Error insert leaderboard:', error);
-      throw error;
+    if (insertErr) {
+      console.error('Error insert leaderboard:', insertErr);
+      throw insertErr;
     }
 
-    return data;
+    return {
+      action: 'inserted',
+      is_new_high: true,
+      current_score: finalScore,
+      player_name: cleanName,
+      difficulty: finalDifficulty,
+      data: insertData
+    };
   };
 
   // Fetch top leaderboard entries (filtered by difficulty if specified)

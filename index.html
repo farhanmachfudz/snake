@@ -1633,12 +1633,18 @@
         submitScoreBtn.innerText = 'Mengirim...';
         submitFeedback.innerHTML = '<span class="feedback-loading">Menyimpan skor ke database...</span>';
 
-        await window.submitGlobalScore(rawName, score, currentDifficulty);
+        const res = await window.submitGlobalScore(rawName, score, currentDifficulty);
         localStorage.setItem('snake_player_name', rawName);
         hasSubmittedThisGame = true;
 
         submitScoreBtn.innerText = 'Terkirim ✓';
-        submitFeedback.innerHTML = '<span class="feedback-success">🎉 Berhasil dicatat ke Global Leaderboard!</span>';
+        if (res && res.action === 'ignored') {
+          submitFeedback.innerHTML = `<span class="feedback-success">ℹ️ Rekor tertinggimu (${res.current_score}) tetap tersimpan di Leaderboard!</span>`;
+        } else if (res && res.action === 'updated') {
+          submitFeedback.innerHTML = `<span class="feedback-success">🎉 Rekor baru tercatat! Naik dari ${res.previous_score} ke ${res.current_score}!</span>`;
+        } else {
+          submitFeedback.innerHTML = '<span class="feedback-success">🎉 Berhasil dicatat ke Global Leaderboard!</span>';
+        }
 
         // Tampilkan papan peringkat global setelah pengiriman sukses
         setTimeout(() => {
